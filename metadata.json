@@ -1,0 +1,8 @@
+{
+  "name": "SentraKreasi Presensi Computer Vision",
+  "description": "Sistem presensi pengenal wajah dan ekspresi untuk PAUD SentraKreasi.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": []
+}
