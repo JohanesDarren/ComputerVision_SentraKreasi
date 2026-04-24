@@ -1,6 +1,13 @@
 from fastapi import FastAPI
 from api.routes import router
 from fastapi.middleware.cors import CORSMiddleware
+import cv2
+import os
+
+# Mencegah OpenCV menyebabkan Deadlock di FastAPI threadpool
+cv2.setNumThreads(1)
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3" # Sembunyikan warning Tensorflow
 
 app = FastAPI(
     title="Face Recognition Microservice",

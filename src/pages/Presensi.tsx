@@ -3,18 +3,19 @@ import Webcam from 'react-webcam';
 import { Camera, RefreshCw, Smile, Target, BatteryMedium, Meh, Frown, ScanFace, LucideIcon, ScanLine } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import { GoogleGenAI } from '@google/genai';
+import { supabase } from '../lib/supabase';
+import { verifyFacePresence } from '../lib/api';
 
 export default function Presensi() {
   const webcamRef = useRef<Webcam>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<'success' | 'error' | null>(null);
-  const [expression, setExpression] = useState<{ icon: LucideIcon, label: string } | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [pegawaiData, setPegawaiData] = useState<any>(null);
 
   const handleCapture = useCallback(async () => {
     setIsScanning(true);
     setScanResult(null);
-    setExpression(null);
     
     const imageSrc = webcamRef.current?.getScreenshot();
     
@@ -24,38 +25,28 @@ export default function Presensi() {
     }
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-      const base64Data = imageSrc.split(',')[1];
+      // 1. Verifikasi Wajah via FastAPI Microservice
+      const apiResult = await verifyFacePresence(imageSrc);
+      
+      if (apiResult.status === 'success') {
+        const pData = apiResult.data;
+        setPegawaiData(pData);
+        setScanResult('success');
 
-      const response = await ai.models.generateContent({
-         model: 'gemini-2.5-flash',
-         contents: [
-           {
-             role: 'user',
-             parts: [
-               { inlineData: { mimeType: 'image/jpeg', data: base64Data } },
-               { text: 'Analisis ekspresi wajah pada gambar ini. Pilih salah satu kata paling DOMINAN untuk mewakilinya: Ceria, Fokus, Netral, Lelah, Sedih, atau TakTerdeteksi. Jawab HANYA DENGAN SATU KATA tersebut tanpa tanda baca lain.' }
-             ]
-           }
-         ]
-      });
-      
-      const expressionText = response.text().trim() || 'Netral';
-      
-      let Icon = Meh;
-      let label = expressionText;
-      
-      if (expressionText.includes('Ceria')) { Icon = Smile; label = 'Ceria'; }
-      else if (expressionText.includes('Fokus')) { Icon = Target; label = 'Fokus'; }
-      else if (expressionText.includes('Lelah')) { Icon = BatteryMedium; label = 'Lelah'; }
-      else if (expressionText.includes('Sedih')) { Icon = Frown; label = 'Sedih'; }
-      else if (expressionText.includes('Tak')) { Icon = ScanFace; label = 'Tidak Terdeteksi'; }
-
-      setExpression({ icon: Icon, label });
-      setScanResult('success');
-      
-    } catch(err) {
-      console.error('Error with AI generation:', err);
+        // 2. Simpan presensi ke Supabase
+        await supabase.from('presensi').insert([
+          {
+            pegawai_id: pData.pegawai_id,
+            status: 'hadir',
+            gambar_bukti_url: null // Jika ingin simpan gambar, perlu upload ke storage Supabase dulu
+          }
+        ]);
+      } else {
+        throw new Error(apiResult.message || 'Verifikasi gagal');
+      }
+    } catch(err: any) {
+      console.error('Error in face verification:', err);
+      setErrorMessage(err.message || 'Terjadi kesalahan saat memverifikasi wajah.');
       setScanResult('error');
     } finally {
       setIsScanning(false);
@@ -78,7 +69,7 @@ export default function Presensi() {
           audio={false}
           ref={webcamRef}
           screenshotFormat="image/jpeg"
-          className="object-cover w-full h-full absolute inset-0 -z-10 opacity-90 dark:opacity-80 grayscale mix-blend-multiply dark:mix-blend-luminosity"
+          className="object-cover w-full h-full absolute inset-0 -z-10 opacity-90 dark:opacity-80"
           videoConstraints={{ facingMode: "user" }}
         />
 
@@ -149,7 +140,7 @@ export default function Presensi() {
         </div>
 
         <AnimatePresence>
-          {scanResult === 'success' && expression && (
+          {scanResult === 'success' && pegawaiData && (
             <motion.div 
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -158,12 +149,33 @@ export default function Presensi() {
             >
               <div className="bg-[#FAF8F5] dark:bg-[#2A2621] border-[4px] border-[#2C2825] dark:border-[#EFEBE1] p-5 md:p-6 flex items-center gap-5 text-left w-full max-w-md">
                 <div className="w-16 h-16 bg-[#EFEBE1] dark:bg-[#151413] border-[3px] border-[#2C2825] dark:border-[#EFEBE1] flex items-center justify-center text-[#386641] shrink-0">
-                   <expression.icon className="w-8 h-8" />
+                   <Smile className="w-8 h-8" />
                 </div>
                 <div>
-                   <h3 className="font-[Bebas_Neue] text-3xl text-[#2C2825] dark:text-[#EFEBE1] uppercase">Presensi Tercatat</h3>
+                   <h3 className="font-[Bebas_Neue] text-3xl text-[#2C2825] dark:text-[#EFEBE1] uppercase">Presensi Berhasil</h3>
                    <p className="text-[10px] font-bold text-[#6B5A4B] dark:text-[#A89886] uppercase tracking-widest mt-1">
-                     Data terverifikasi.<br/> Ekspresi: <span className="text-[#386641]">{expression.label}</span>.
+                     Selamat Datang, <span className="text-[#386641]">{pegawaiData.nama}</span>.<br/> NIP: {pegawaiData.nip}
+                   </p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {scanResult === 'error' && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              className="absolute top-6 left-6 right-6 z-30 flex justify-center"
+            >
+              <div className="bg-[#FAF8F5] dark:bg-[#2A2621] border-[4px] border-[#E36D4F] p-5 md:p-6 flex items-center gap-5 text-left w-full max-w-md">
+                <div className="w-16 h-16 bg-[#EFEBE1] dark:bg-[#151413] border-[3px] border-[#E36D4F] flex items-center justify-center text-[#E36D4F] shrink-0">
+                   <Frown className="w-8 h-8" />
+                </div>
+                <div>
+                   <h3 className="font-[Bebas_Neue] text-3xl text-[#2C2825] dark:text-[#EFEBE1] uppercase">Presensi Gagal</h3>
+                   <p className="text-[10px] font-bold text-[#E36D4F] uppercase tracking-widest mt-1">
+                     {errorMessage}
                    </p>
                 </div>
               </div>
@@ -184,7 +196,11 @@ export default function Presensi() {
           <div className="flex items-center justify-center h-12 w-12 bg-[#EFEBE1] dark:bg-[#1E1C1A] text-xs font-bold text-[#2C2825] dark:text-[#EFEBE1] border-[2px] border-[#2C2825] dark:border-[#EFEBE1]">+42</div>
         </div>
         <div className="flex-1 bg-[#EFEBE1] dark:bg-[#151413] border-[3px] border-[#2C2825] dark:border-[#EFEBE1] flex items-center px-5 py-3 md:py-4 min-w-[250px]">
-          <p className="text-[#2C2825] dark:text-[#EFEBE1] text-[10px] font-bold uppercase tracking-widest truncate">"Ananda Budi baru saja presensi dengan ekspresi ceria."</p>
+          <p className="text-[#2C2825] dark:text-[#EFEBE1] text-[10px] font-bold uppercase tracking-widest truncate">
+            {scanResult === 'success' && pegawaiData 
+              ? `"Ananda ${pegawaiData.nama.split(' ')[0]} baru saja melakukan presensi."`
+              : `"Sistem presensi biometrik siap digunakan."`}
+          </p>
         </div>
       </div>
     </div>

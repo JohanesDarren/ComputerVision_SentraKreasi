@@ -13,23 +13,46 @@ THRESHOLD_SIMILARITY = 0.65
 @router.post("/register-face")
 async def register_face(
     pegawai_id: str = Form(..., description="UUID Pegawai dari tabel Supabase"),
-    file: UploadFile = File(..., description="File gambar wajah pegawai")
+    files: list[UploadFile] = File(..., description="File gambar wajah pegawai (bisa lebih dari satu)")
 ):
     """
     Endpoint untuk mendaftarkan wajah pegawai ke database.
-    Menerima file gambar dan ID pegawai, memproses wajahnya, dan mengupdate vektor di Supabase.
+    Menerima beberapa file gambar (berbagai sisi wajah), memproses semuanya, 
+    merata-ratakan vektornya untuk akurasi tinggi, lalu simpan ke Supabase.
     """
-    try:
-        contents = await file.read()
-    except Exception:
-        raise HTTPException(status_code=400, detail="Gagal membaca file gambar yang diunggah.")
+    if not files or len(files) == 0:
+        raise HTTPException(status_code=400, detail="Tidak ada gambar yang diunggah.")
+
+    embeddings = []
     
-    # 1 & 2. Deteksi wajah dengan YOLOv8 dan ekstrak embedding dengan DeepFace
-    embedding = process_face_image(contents)
+    for file in files:
+        try:
+            contents = await file.read()
+        except Exception:
+            raise HTTPException(status_code=400, detail=f"Gagal membaca file gambar {file.filename}.")
+        
+        # Ekstrak embedding untuk masing-masing gambar (di background thread)
+        from fastapi.concurrency import run_in_threadpool
+        try:
+            emb = await run_in_threadpool(process_face_image, contents)
+            embeddings.append(emb)
+        except Exception as e:
+            # Jika salah satu gagal, kita bisa ignore atau throw error. 
+            # Lebih aman throw error agar admin tahu foto tersebut jelek.
+            if isinstance(e, HTTPException):
+                raise e
+            raise HTTPException(status_code=400, detail=f"Gagal memproses gambar {file.filename}: {str(e)}")
+            
+    if not embeddings:
+        raise HTTPException(status_code=400, detail="Tidak ada wajah yang berhasil diekstrak.")
+        
+    # Rata-ratakan semua vektor (mean pooling)
+    import numpy as np
+    avg_embedding = np.mean(embeddings, axis=0).tolist()
     
     # 3. Simpan/Update vektor ke database Supabase
     try:
-        response = supabase.table('pegawai').update({'embedding': embedding}).eq('id', pegawai_id).execute()
+        response = supabase.table('pegawai').update({'embedding': avg_embedding}).eq('id', pegawai_id).execute()
         # Periksa apakah data berhasil diupdate
         if len(response.data) == 0:
             raise HTTPException(status_code=404, detail="Pegawai tidak ditemukan di database.")
@@ -57,8 +80,15 @@ async def verify_presence(
     except Exception:
         raise HTTPException(status_code=400, detail="Gagal membaca file gambar presensi.")
     
-    # 1 & 2. Deteksi wajah dengan YOLOv8 dan ekstrak embedding
-    embedding = process_face_image(contents)
+    # 1 & 2. Deteksi wajah dengan YOLOv8 dan ekstrak embedding (Jalankan di background thread agar tidak blok server!)
+    from fastapi.concurrency import run_in_threadpool
+    try:
+        embedding = await run_in_threadpool(process_face_image, contents)
+    except Exception as e:
+        # Jika process_face_image melempar HTTPException, kita harus raise ulang
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(status_code=500, detail=str(e))
     
     # 3. Pencarian wajah di database Supabase menggunakan RPC
     try:

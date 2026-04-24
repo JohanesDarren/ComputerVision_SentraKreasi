@@ -1,13 +1,8 @@
-import { Calendar, Search, Filter, Smile, Target, BatteryMedium, Meh } from 'lucide-react';
-
-const historyData = [
-  { id: 1, date: '21 Apr 2026', time: '07:15', status: 'Hadir', type: 'Wajah', ekspresi: 'Ceria', role: 'Siswa', name: 'Budi Cahyono', color: 'bg-[#386641] text-white border-[2px] border-[#2C2825] dark:border-[#EFEBE1]' },
-  { id: 2, date: '20 Apr 2026', time: '07:22', status: 'Hadir', type: 'Wajah', ekspresi: 'Fokus', role: 'Guru', name: 'Siti Aminah', color: 'bg-[#386641] text-white border-[2px] border-[#2C2825] dark:border-[#EFEBE1]' },
-  { id: 3, date: '19 Apr 2026', time: '07:45', status: 'Terlambat', type: 'Wajah', ekspresi: 'Lelah', role: 'Siswa', name: 'Lani Septiani', color: 'bg-[#E36D4F] text-white border-[2px] border-[#2C2825] dark:border-[#EFEBE1]' },
-  { id: 4, date: '18 Apr 2026', time: '07:10', status: 'Hadir', type: 'Wajah', ekspresi: 'Ceria', role: 'Siswa', name: 'Andi Kusuma', color: 'bg-[#6B5A4B] text-white border-[2px] border-[#2C2825] dark:border-[#EFEBE1]' },
-  { id: 5, date: '17 Apr 2026', time: '07:18', status: 'Hadir', type: 'Wajah', ekspresi: 'Netral', role: 'Siswa', name: 'Budi Cahyono', color: 'bg-[#386641] text-white border-[2px] border-[#2C2825] dark:border-[#EFEBE1]' },
-];
-
+import { Calendar, Search, Filter, Smile, Target, BatteryMedium, Meh, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
+import { format } from 'date-fns';
+import { id as localeID } from 'date-fns/locale';
 const getExpressionIcon = (expr: string) => {
   if (expr === 'Ceria') return <Smile className="w-5 h-5 text-[#2C2825] dark:text-[#EFEBE1]" />;
   if (expr === 'Fokus') return <Target className="w-5 h-5 text-[#2C2825] dark:text-[#EFEBE1]" />;
@@ -16,6 +11,37 @@ const getExpressionIcon = (expr: string) => {
 };
 
 export default function History() {
+  const [historyData, setHistoryData] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchHistory() {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('presensi')
+        .select(`
+          id,
+          waktu_hadir,
+          status,
+          pegawai:pegawai_id (
+            nama,
+            nip
+          )
+        `)
+        .order('waktu_hadir', { ascending: false })
+        .limit(20);
+
+      if (error) {
+        console.error('Error fetching history:', error);
+      } else {
+        setHistoryData(data || []);
+      }
+      setIsLoading(false);
+    }
+
+    fetchHistory();
+  }, []);
+
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
@@ -56,36 +82,53 @@ export default function History() {
               </tr>
             </thead>
             <tbody className="divide-y-[3px] divide-[#2C2825] dark:divide-[#EFEBE1] bg-[#FAF8F5] dark:bg-[#2A2621]">
-              {historyData.map((item) => (
+              {isLoading ? (
+                <tr>
+                  <td colSpan={5} className="py-12 text-center text-[#2C2825] dark:text-[#EFEBE1]">
+                    <div className="flex justify-center items-center gap-3 font-[Bebas_Neue] text-2xl tracking-widest uppercase">
+                      <Loader2 className="w-8 h-8 animate-spin text-[#386641]" />
+                      Memuat Data...
+                    </div>
+                  </td>
+                </tr>
+              ) : historyData.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="py-12 text-center text-[#2C2825] dark:text-[#EFEBE1]">
+                    <div className="font-[Bebas_Neue] text-2xl tracking-widest uppercase text-[#6B5A4B] dark:text-[#A89886]">Belum ada riwayat presensi</div>
+                  </td>
+                </tr>
+              ) : historyData.map((item) => (
                 <tr key={item.id} className="hover:bg-[#EFEBE1] dark:hover:bg-[#151413] transition-colors">
                   <td className="py-4 px-6 flex items-center gap-4">
-                    <div className={`w-12 h-12 flex items-center justify-center font-[Bebas_Neue] text-xl ${item.color}`}>
-                       {item.name.substring(0, 2).toUpperCase()}
+                    <div className={`w-12 h-12 flex items-center justify-center font-[Bebas_Neue] text-xl bg-[#386641] text-white border-[2px] border-[#2C2825] dark:border-[#EFEBE1]`}>
+                       {item.pegawai?.nama?.substring(0, 2).toUpperCase() || '??'}
                     </div>
                     <div>
-                       <p className="text-sm font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">{item.name}</p>
-                       <p className="text-[10px] uppercase font-bold text-[#6B5A4B] dark:text-[#A89886] mt-1">{item.role}</p>
+                       <p className="text-sm font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">{item.pegawai?.nama || 'Unknown'}</p>
+                       <p className="text-[10px] uppercase font-bold text-[#6B5A4B] dark:text-[#A89886] mt-1">{item.pegawai?.nip || '-'}</p>
                     </div>
                   </td>
                   <td className="py-4 px-6 border-l-[3px] border-[#2C2825] dark:border-[#EFEBE1]">
-                    <div className="font-[Bebas_Neue] text-2xl text-[#2C2825] dark:text-[#EFEBE1]">{item.time}</div>
+                    <div className="font-[Bebas_Neue] text-2xl text-[#2C2825] dark:text-[#EFEBE1]">
+                      {item.waktu_hadir ? format(new Date(item.waktu_hadir), 'HH:mm') : '-'}
+                    </div>
                     <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-[#6B5A4B] dark:text-[#A89886] mt-1">
                        <Calendar className="w-3 h-3" />
-                       {item.date}
+                       {item.waktu_hadir ? format(new Date(item.waktu_hadir), 'dd MMM yyyy', { locale: localeID }) : '-'}
                     </div>
                   </td>
                   <td className="py-4 px-6 border-l-[3px] border-[#2C2825] dark:border-[#EFEBE1]">
                     <span className={`inline-flex items-center px-4 py-2 text-[10px] tracking-widest uppercase font-bold border-[2px] border-[#2C2825] dark:border-[#EFEBE1]
-                      ${item.status === 'Hadir' ? 'bg-[#386641] text-white' : 'bg-[#E36D4F] text-white'}
+                      ${item.status === 'hadir' ? 'bg-[#386641] text-white' : 'bg-[#E36D4F] text-white'}
                     `}>
                       {item.status}
                     </span>
                   </td>
-                  <td className="py-4 px-6 text-xs uppercase font-bold text-[#2C2825] dark:text-[#EFEBE1] border-l-[3px] border-[#2C2825] dark:border-[#EFEBE1]">{item.type}</td>
+                  <td className="py-4 px-6 text-xs uppercase font-bold text-[#2C2825] dark:text-[#EFEBE1] border-l-[3px] border-[#2C2825] dark:border-[#EFEBE1]">Wajah (AI)</td>
                   <td className="py-4 px-6 border-l-[3px] border-[#2C2825] dark:border-[#EFEBE1]">
                     <div className="flex items-center gap-3 bg-[#EFEBE1] dark:bg-[#151413] px-3 py-2 border-[2px] border-[#2C2825] dark:border-[#EFEBE1] w-max">
-                       {getExpressionIcon(item.ekspresi)}
-                       <span className="text-[10px] uppercase font-bold tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">{item.ekspresi}</span>
+                       <Smile className="w-5 h-5 text-[#2C2825] dark:text-[#EFEBE1]" />
+                       <span className="text-[10px] uppercase font-bold tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">Terdeteksi</span>
                     </div>
                   </td>
                 </tr>

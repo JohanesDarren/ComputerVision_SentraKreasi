@@ -1,14 +1,42 @@
-import { User, Mail, Phone, MapPin, Save, Camera } from 'lucide-react';
-import { useState } from 'react';
+import { User, Mail, Phone, MapPin, Save, Camera, AlertCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { cn } from '../lib/utils';
+import { supabase } from '../lib/supabase';
 
 export default function Profile() {
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [pegawai, setPegawai] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleSave = (e: React.FormEvent) => {
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        // Ambil data pegawai pertama sebagai profil user ini (karena blm ada fitur login multi-user)
+        const { data } = await supabase.from('pegawai').select('*').limit(1).single();
+        if (data) setPegawai(data);
+      } catch (err) {
+        console.error('Gagal memuat profil:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadProfile();
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
+    
+    // Asumsi update profil
+    if (pegawai) {
+       const form = e.target as HTMLFormElement;
+       const nama = (form.elements.namedItem('nama') as HTMLInputElement).value;
+       
+       await supabase.from('pegawai').update({ nama }).eq('id', pegawai.id);
+       setPegawai({...pegawai, nama});
+    }
+
     setTimeout(() => {
       setIsSaving(false);
       setIsSaved(true);
@@ -33,11 +61,24 @@ export default function Profile() {
               <Camera className="w-8 h-8" />
             </div>
           </div>
-          <h2 className="font-[Bebas_Neue] text-4xl text-[#2C2825] dark:text-[#EFEBE1] uppercase">Ahmad Guru</h2>
-          <p className="text-[10px] uppercase font-bold tracking-widest text-[#6B5A4B] dark:text-[#A89886] mt-1">Guru Wali Kelas</p>
-          <div className="mt-8 px-5 py-3 bg-[#EFEBE1] dark:bg-[#151413] text-[#386641] text-[10px] font-bold uppercase tracking-widest border-[3px] border-[#2C2825] dark:border-[#EFEBE1] inline-flex items-center justify-center gap-3 w-full">
-            <div className="w-3 h-3 bg-[#386641] border-[2px] border-[#2C2825] dark:border-[#EFEBE1] animate-pulse" />
-            FaceID Terdaftar
+          <h2 className="font-[Bebas_Neue] text-4xl text-[#2C2825] dark:text-[#EFEBE1] uppercase mt-6">
+            {isLoading ? 'Memuat...' : pegawai?.nama || 'Belum Ada Profil'}
+          </h2>
+          <p className="text-[10px] uppercase font-bold tracking-widest text-[#6B5A4B] dark:text-[#A89886] mt-1">
+            {pegawai ? 'Pengguna Sistem' : 'Harap daftarkan wajah dulu'}
+          </p>
+          <div className={cn("mt-8 px-5 py-3 text-[10px] font-bold uppercase tracking-widest border-[3px] inline-flex items-center justify-center gap-3 w-full transition-colors", pegawai?.embedding ? "bg-[#EFEBE1] dark:bg-[#151413] text-[#386641] border-[#2C2825] dark:border-[#EFEBE1]" : "bg-[#E36D4F] text-white border-[#2C2825]")}>
+            {pegawai?.embedding ? (
+               <>
+                 <div className="w-3 h-3 bg-[#386641] border-[2px] border-[#2C2825] dark:border-[#EFEBE1] animate-pulse" />
+                 Biometrik Aktif
+               </>
+            ) : (
+               <>
+                 <AlertCircle className="w-4 h-4" />
+                 Belum Ada Biometrik
+               </>
+            )}
           </div>
         </div>
 
@@ -52,14 +93,14 @@ export default function Profile() {
                 <label className="text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">Nama Lengkap</label>
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#2C2825] dark:text-[#EFEBE1]" />
-                  <input type="text" defaultValue="Ahmad Guru" className="w-full pl-12 pr-4 py-4 bg-[#EFEBE1] dark:bg-[#151413] border-[3px] border-[#2C2825] dark:border-[#EFEBE1] text-sm font-bold uppercase text-[#2C2825] dark:text-[#EFEBE1] focus:outline-none focus:bg-[#FAF8F5] dark:focus:bg-[#1E1C1A] transition-colors" />
+                  <input name="nama" type="text" defaultValue={pegawai?.nama || ''} placeholder={isLoading ? "Memuat..." : "Masukkan nama"} className="w-full pl-12 pr-4 py-4 bg-[#EFEBE1] dark:bg-[#151413] border-[3px] border-[#2C2825] dark:border-[#EFEBE1] text-sm font-bold uppercase text-[#2C2825] dark:text-[#EFEBE1] focus:outline-none focus:bg-[#FAF8F5] dark:focus:bg-[#1E1C1A] transition-colors" />
                 </div>
               </div>
               
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">Nomor Induk / NIK</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">Nomor Induk / NIP</label>
                 <div className="relative">
-                  <input type="text" defaultValue="3174123456789012" disabled className="w-full px-5 py-4 bg-[#1E1C1A] dark:bg-black/60 border-[3px] border-[#6B5A4B] text-[#A89886] text-sm font-bold uppercase cursor-not-allowed" />
+                  <input type="text" defaultValue={pegawai?.nip || ''} placeholder="-" disabled className="w-full px-5 py-4 bg-[#1E1C1A] dark:bg-black/60 border-[3px] border-[#6B5A4B] text-[#A89886] text-sm font-bold uppercase cursor-not-allowed" />
                 </div>
               </div>
 

@@ -1,24 +1,76 @@
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { Clock, MapPin, CheckCircle, TrendingUp, Sparkles, Smile, BatteryMedium } from 'lucide-react';
 import { useTheme } from '../components/ThemeProvider';
-
-const data = [
-  { name: 'Sen', hadir: 8 },
-  { name: 'Sel', hadir: 7.5 },
-  { name: 'Rab', hadir: 8 },
-  { name: 'Kam', hadir: 8.5 },
-  { name: 'Jum', hadir: 7 },
-];
+import { useState, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
+import { format } from 'date-fns';
 
 export default function Dashboard() {
   const { theme } = useTheme();
+  const [pegawai, setPegawai] = useState<any>(null);
+  const [stats, setStats] = useState({ totalHadir: 0, timeMasuk: '--:--' });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true);
+      try {
+        // Ambil pegawai pertama sebagai user aktif (karena belum ada sistem login)
+        const { data: pData } = await supabase.from('pegawai').select('*').limit(1).single();
+        if (pData) {
+          setPegawai(pData);
+          
+          // Ambil presensi hari ini untuk pegawai tersebut
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          const { data: prData } = await supabase
+            .from('presensi')
+            .select('waktu_hadir')
+            .eq('pegawai_id', pData.id)
+            .gte('waktu_hadir', today.toISOString())
+            .order('waktu_hadir', { ascending: true })
+            .limit(1)
+            .single();
+
+          const { count } = await supabase
+            .from('presensi')
+            .select('*', { count: 'exact', head: true })
+            .eq('pegawai_id', pData.id)
+            .eq('status', 'hadir');
+            
+          setStats({ 
+            totalHadir: count || 0, 
+            timeMasuk: prData ? format(new Date(prData.waktu_hadir), 'HH:mm') : '--:--' 
+          });
+        }
+      } catch (err) {
+        console.error("Error memuat data dashboard:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  const dummyData = [
+    { name: 'Sen', hadir: 8 },
+    { name: 'Sel', hadir: 7.5 },
+    { name: 'Rab', hadir: 8 },
+    { name: 'Kam', hadir: 8.5 },
+    { name: 'Jum', hadir: 7 },
+  ];
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8 relative">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="font-[Bebas_Neue] text-5xl md:text-6xl tracking-wide uppercase text-[#2C2825] dark:text-[#EFEBE1]">Selamat Datang, Budi</h1>
-          <p className="text-sm font-bold text-[#6B5A4B] dark:text-[#A89886] uppercase tracking-widest mt-1">Sistem Siap. Ini ringkasan performamu.</p>
+          <h1 className="font-[Bebas_Neue] text-5xl md:text-6xl tracking-wide uppercase text-[#2C2825] dark:text-[#EFEBE1]">
+            {isLoading ? 'Memuat...' : pegawai ? `Selamat Datang, ${pegawai.nama.split(' ')[0]}` : 'Selamat Datang'}
+          </h1>
+          <p className="text-sm font-bold text-[#6B5A4B] dark:text-[#A89886] uppercase tracking-widest mt-1">
+            {pegawai ? `NIP: ${pegawai.nip} | Sistem Siap.` : 'Belum ada data pegawai.'}
+          </p>
         </div>
         <div className="flex items-center gap-2 bg-[#EFEBE1] dark:bg-[#1E1C1A] border-[3px] border-[#2C2825] dark:border-[#EFEBE1] px-4 py-3">
            <MapPin className="w-5 h-5 text-[#386641]" />
@@ -34,7 +86,7 @@ export default function Dashboard() {
             </div>
             <div>
               <p className="text-[10px] font-bold text-[#6B5A4B] dark:text-[#A89886] uppercase tracking-widest">Waktu Masuk Hari Ini</p>
-              <h3 className="font-[Bebas_Neue] text-4xl text-[#2C2825] dark:text-[#EFEBE1] leading-none mt-1">07:15 <span className="text-lg">AM</span></h3>
+              <h3 className="font-[Bebas_Neue] text-4xl text-[#2C2825] dark:text-[#EFEBE1] leading-none mt-1">{stats.timeMasuk} <span className="text-lg">WIB</span></h3>
             </div>
           </div>
           <div className="w-full bg-[#EFEBE1] dark:bg-[#151413] h-3 border-[2px] border-[#2C2825] dark:border-[#EFEBE1] mt-6 relative overflow-hidden">
@@ -51,11 +103,11 @@ export default function Dashboard() {
               <TrendingUp className="w-6 h-6" />
             </div>
             <div>
-              <p className="text-[10px] font-bold text-[#6B5A4B] dark:text-[#A89886] uppercase tracking-widest">Tingkat Kehadiran</p>
-              <h3 className="font-[Bebas_Neue] text-5xl text-[#2C2825] dark:text-[#EFEBE1] leading-none mt-1">95%</h3>
+              <p className="text-[10px] font-bold text-[#6B5A4B] dark:text-[#A89886] uppercase tracking-widest">Total Kehadiran</p>
+              <h3 className="font-[Bebas_Neue] text-5xl text-[#2C2825] dark:text-[#EFEBE1] leading-none mt-1">{stats.totalHadir} <span className="text-xl">Hari</span></h3>
             </div>
           </div>
-          <p className="text-[10px] font-bold text-[#6B5A4B] dark:text-[#A89886] uppercase tracking-widest mt-6 border-t-[3px] border-[#2C2825] dark:border-[#EFEBE1] pt-4">Tingkat kehadiran meningkat +2%.</p>
+          <p className="text-[10px] font-bold text-[#6B5A4B] dark:text-[#A89886] uppercase tracking-widest mt-6 border-t-[3px] border-[#2C2825] dark:border-[#EFEBE1] pt-4">Berdasarkan data di database (real-time).</p>
         </div>
 
         <div className="bg-[#386641] border-[4px] border-[#2C2825] dark:border-[#EFEBE1] p-6 relative overflow-hidden group">
@@ -87,7 +139,7 @@ export default function Dashboard() {
           </div>
           <div className="h-72 mt-4 font-mono text-xs">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data}>
+              <AreaChart data={dummyData}>
                 <defs>
                   <linearGradient id="colorHadir" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#386641" stopOpacity={0.8}/>
