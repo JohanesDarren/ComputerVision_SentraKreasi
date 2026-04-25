@@ -1,102 +1,120 @@
-import { useState, useEffect } from 'react';
+import { Users, Search, Plus, Trash2, Edit, AlertCircle, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Trash2, Users, RefreshCw } from 'lucide-react';
-import { format } from 'date-fns';
-import { id } from 'date-fns/locale';
 
 export default function AdminPegawai() {
   const [pegawai, setPegawai] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchPegawai = async () => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('pegawai')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      setPegawai(data || []);
-    } catch (err) {
-      console.error("Gagal memuat data pegawai:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
     fetchPegawai();
   }, []);
 
-  const handleDelete = async (id: string, nama: string) => {
-    if (window.confirm(`Yakin ingin menghapus data biometrik dan akun ${nama}? Seluruh riwayat presensinya juga akan terhapus!`)) {
-      try {
-        await supabase.from('pegawai').delete().eq('id', id);
-        fetchPegawai();
-      } catch (err) {
-        console.error("Gagal menghapus:", err);
-        alert("Gagal menghapus pegawai.");
-      }
-    }
+  async function fetchPegawai() {
+    setIsLoading(true);
+    const { data, error } = await supabase.from('pegawai').select('*').order('created_at', { ascending: false });
+    if (!error && data) setPegawai(data);
+    setIsLoading(false);
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Yakin ingin menghapus pegawai ini? Data presensi terkait mungkin akan terpengaruh.')) return;
+    await supabase.from('pegawai').delete().eq('id', id);
+    fetchPegawai();
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto h-full space-y-6 animate-in fade-in slide-in-from-bottom-4">
-      <div className="bg-[#FAF8F5] dark:bg-[#2A2621] border-[4px] border-[#2C2825] dark:border-[#EFEBE1] rounded-none p-6 md:p-8">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-             <h1 className="font-[Bebas_Neue] text-5xl tracking-wide text-[#2C2825] dark:text-[#EFEBE1] uppercase mb-2">Data Pegawai (Database)</h1>
-             <p className="text-[10px] font-bold uppercase tracking-widest text-[#6B5A4B] dark:text-[#A89886] border-t-[3px] border-[#2C2825] dark:border-[#EFEBE1] pt-4">
-               Manajemen data pengguna aktif dan histori biometrik dari Supabase.
-             </p>
+    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8 text-white relative">
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-green-500/10 rounded-full blur-[150px] pointer-events-none -z-10 mix-blend-screen"></div>
+
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="bg-white/5 border border-white/10 p-8 rounded-3xl backdrop-blur-xl w-full md:w-auto relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/20 blur-3xl rounded-full"></div>
+          <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">Data Pegawai</h1>
+          <p className="text-sm font-medium text-white/50 mt-2">Kelola informasi dan biometrik karyawan.</p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+            <input 
+              type="text" 
+              placeholder="Cari NIP / Nama..." 
+              className="pl-12 pr-4 py-3 rounded-full border border-white/10 bg-white/5 text-sm focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 text-white placeholder-white/40 w-full md:w-48 lg:w-64 transition-all backdrop-blur-md shadow-inner"
+            />
           </div>
-          <button onClick={fetchPegawai} className="p-3 bg-[#EFEBE1] border-[3px] border-[#2C2825] hover:bg-[#2C2825] hover:text-white transition-colors group">
-            <RefreshCw className={`w-5 h-5 text-[#2C2825] group-hover:text-white ${isLoading ? 'animate-spin' : ''}`} />
+          <button className="p-3 px-6 rounded-full border border-green-500/30 bg-green-500 text-black shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:bg-green-400 flex items-center gap-2 text-sm font-bold transition-all">
+            <Plus className="w-4 h-4" />
+            <span className="hidden sm:inline">Tambah Pegawai</span>
           </button>
         </div>
+      </div>
 
-        <div className="overflow-x-auto border-[3px] border-[#2C2825] dark:border-[#EFEBE1] bg-white dark:bg-[#151413]">
-          <table className="w-full text-left border-collapse">
+      <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden flex flex-col transition-colors backdrop-blur-xl">
+        <div className="p-6 border-b border-white/10 bg-white/5">
+           <h3 className="text-lg font-semibold text-white">Daftar Pegawai Aktif</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
-              <tr className="bg-[#EFEBE1] dark:bg-[#1E1C1A] border-b-[3px] border-[#2C2825] dark:border-[#EFEBE1]">
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">Nama Lengkap</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">NIP</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">Biometrik</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">Tanggal Daftar</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1] text-right">Aksi</th>
+              <tr className="border-b border-white/10 bg-black/20">
+                <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-widest">Profil</th>
+                <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-widest">Email</th>
+                <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-widest">Status Biometrik</th>
+                <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-widest text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-white/5">
               {isLoading ? (
-                <tr><td colSpan={5} className="p-8 text-center text-sm font-bold uppercase tracking-widest animate-pulse">Memuat Data...</td></tr>
-              ) : pegawai.length === 0 ? (
-                <tr><td colSpan={5} className="p-8 text-center text-sm font-bold uppercase tracking-widest">Tidak ada data pegawai.</td></tr>
-              ) : pegawai.map((p) => (
-                <tr key={p.id} className="border-b-[2px] border-[#2C2825] dark:border-[#2A2621] hover:bg-[#FAF8F5] dark:hover:bg-[#2A2621] transition-colors">
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-[#386641] flex items-center justify-center border-[2px] border-[#2C2825]">
-                        <Users className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="font-bold text-[#2C2825] dark:text-[#EFEBE1] uppercase text-sm">{p.nama}</span>
+                <tr>
+                  <td colSpan={4} className="py-16 text-center text-white/50">
+                    <div className="flex justify-center items-center gap-3 text-sm font-semibold">
+                      <Loader2 className="w-5 h-5 animate-spin text-green-400" /> Memuat Data...
                     </div>
                   </td>
-                  <td className="p-4 text-sm font-bold text-[#6B5A4B] dark:text-[#A89886]">{p.nip}</td>
-                  <td className="p-4">
-                    {p.embedding ? (
-                      <span className="bg-[#386641] text-white px-2 py-1 text-[10px] font-bold uppercase tracking-wider border-[2px] border-[#2C2825]">Terdaftar (512D)</span>
+                </tr>
+              ) : pegawai.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-16 text-center text-white/50">
+                    <div className="text-sm font-semibold">Tidak ada data pegawai</div>
+                  </td>
+                </tr>
+              ) : pegawai.map((item) => (
+                <tr key={item.id} className="hover:bg-white/5 transition-colors group">
+                  <td className="py-4 px-6 flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-green-500/10 text-green-400 border border-green-500/20 group-hover:bg-green-500 group-hover:text-black transition-colors">
+                       {item.nama?.substring(0, 2).toUpperCase() || '??'}
+                    </div>
+                    <div>
+                       <p className="text-sm font-semibold text-white">{item.nama}</p>
+                       <p className="text-xs font-medium text-white/40 mt-0.5">NIP: {item.nip}</p>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6 text-sm text-white/70">
+                    {item.email || '-'}
+                  </td>
+                  <td className="py-4 px-6">
+                    {item.embedding ? (
+                      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-green-500/20 bg-green-500/10 text-green-400">
+                        <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                        Terdaftar
+                      </span>
                     ) : (
-                      <span className="bg-[#E36D4F] text-white px-2 py-1 text-[10px] font-bold uppercase tracking-wider border-[2px] border-[#2C2825]">Belum Terdaftar</span>
+                      <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-red-500/20 bg-red-500/10 text-red-400">
+                        <AlertCircle className="w-3 h-3" />
+                        Belum Terdaftar
+                      </span>
                     )}
                   </td>
-                  <td className="p-4 text-xs font-bold text-[#6B5A4B] dark:text-[#A89886]">
-                    {format(new Date(p.created_at), 'dd MMM yyyy, HH:mm', { locale: id })}
-                  </td>
-                  <td className="p-4 text-right">
-                    <button onClick={() => handleDelete(p.id, p.nama)} className="p-2 bg-[#E36D4F] text-white border-[2px] border-[#2C2825] hover:bg-[#2C2825] transition-colors">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center justify-end gap-2">
+                       <button className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/70 hover:text-white transition-all border border-white/5">
+                         <Edit className="w-4 h-4" />
+                       </button>
+                       <button onClick={() => handleDelete(item.id)} className="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all">
+                         <Trash2 className="w-4 h-4" />
+                       </button>
+                    </div>
                   </td>
                 </tr>
               ))}

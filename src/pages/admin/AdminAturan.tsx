@@ -1,113 +1,114 @@
-import { useState, useEffect } from 'react';
+import { Plus, Power, Trash2, Clock, CheckCircle, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Settings, RefreshCw, Plus } from 'lucide-react';
 
 export default function AdminAturan() {
   const [aturan, setAturan] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchAturan = async () => {
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('aturan_presensi')
-        .select('*')
-        .order('jam_mulai', { ascending: true });
-      
-      // Jika error, berarti tabel belum dibuat, atau ada error lain
-      if (error) {
-        console.warn("Mungkin tabel aturan_presensi belum ada:", error);
-      } else {
-        setAturan(data || []);
-      }
-    } catch (err) {
-      console.error("Gagal memuat aturan:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
     fetchAturan();
   }, []);
 
-  const toggleStatus = async (id: string, currentStatus: string) => {
-    const newStatus = currentStatus === 'aktif' ? 'nonaktif' : 'aktif';
-    try {
-      await supabase.from('aturan_presensi').update({ status: newStatus }).eq('id', id);
-      fetchAturan();
-    } catch (err) {
-      console.error("Gagal mengubah status:", err);
-    }
+  async function fetchAturan() {
+    setIsLoading(true);
+    const { data, error } = await supabase.from('aturan_presensi').select('*').order('created_at', { ascending: true });
+    if (!error && data) setAturan(data);
+    setIsLoading(false);
+  }
+
+  const toggleStatus = async (id: string, currentStatus: boolean) => {
+    await supabase.from('aturan_presensi').update({ is_active: !currentStatus }).eq('id', id);
+    fetchAturan();
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Hapus aturan ini?')) return;
+    await supabase.from('aturan_presensi').delete().eq('id', id);
+    fetchAturan();
   };
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto h-full space-y-6 animate-in fade-in slide-in-from-bottom-4">
-      <div className="bg-[#FAF8F5] dark:bg-[#2A2621] border-[4px] border-[#2C2825] dark:border-[#EFEBE1] rounded-none p-6 md:p-8">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-             <h1 className="font-[Bebas_Neue] text-5xl tracking-wide text-[#2C2825] dark:text-[#EFEBE1] uppercase mb-2">Aturan Presensi (Database)</h1>
-             <p className="text-[10px] font-bold uppercase tracking-widest text-[#6B5A4B] dark:text-[#A89886] border-t-[3px] border-[#2C2825] dark:border-[#EFEBE1] pt-4">
-               Konfigurasi parameter waktu kehadiran sekolah dari Supabase.
-             </p>
-          </div>
-          <button onClick={fetchAturan} className="p-3 bg-[#EFEBE1] border-[3px] border-[#2C2825] hover:bg-[#2C2825] hover:text-white transition-colors group">
-            <RefreshCw className={`w-5 h-5 text-[#2C2825] group-hover:text-white ${isLoading ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
+    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8 text-white relative">
+      <div className="absolute bottom-1/4 right-0 w-[400px] h-[400px] bg-green-500/10 rounded-full blur-[150px] pointer-events-none -z-10 mix-blend-screen"></div>
 
-        {aturan.length === 0 && !isLoading && (
-          <div className="bg-[#E36D4F]/10 border-[3px] border-[#E36D4F] p-4 mb-6">
-             <p className="text-sm font-bold text-[#E36D4F] uppercase tracking-widest mb-2">PERINGATAN: TABEL BELUM ADA / KOSONG</p>
-             <p className="text-xs font-bold text-[#6B5A4B]">Tabel "aturan_presensi" sepertinya belum dibuat atau kosong di Supabase. Harap jalankan script SQL yang diberikan untuk membuatnya.</p>
-          </div>
-        )}
-
-        <div className="overflow-x-auto border-[3px] border-[#2C2825] dark:border-[#EFEBE1] bg-white dark:bg-[#151413] mb-6">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-[#EFEBE1] dark:bg-[#1E1C1A] border-b-[3px] border-[#2C2825] dark:border-[#EFEBE1]">
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">Nama Aturan</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">Jam Mulai</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">Jam Selesai</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">Status</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1] text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr><td colSpan={5} className="p-8 text-center text-sm font-bold uppercase tracking-widest animate-pulse">Memuat Data...</td></tr>
-              ) : aturan.map((a) => (
-                <tr key={a.id} className="border-b-[2px] border-[#2C2825] dark:border-[#2A2621] hover:bg-[#FAF8F5] dark:hover:bg-[#2A2621] transition-colors">
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-[#2C2825] flex items-center justify-center border-[2px] border-[#EFEBE1]">
-                        <Settings className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="font-bold text-[#2C2825] dark:text-[#EFEBE1] uppercase text-sm">{a.nama_aturan}</span>
-                    </div>
-                  </td>
-                  <td className="p-4 text-sm font-bold text-[#6B5A4B] dark:text-[#A89886]">{a.jam_mulai}</td>
-                  <td className="p-4 text-sm font-bold text-[#6B5A4B] dark:text-[#A89886]">{a.jam_selesai}</td>
-                  <td className="p-4">
-                    <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider border-[2px] border-[#2C2825] ${a.status === 'aktif' ? 'bg-[#386641] text-white' : 'bg-[#EFEBE1] text-[#2C2825]'}`}>
-                      {a.status}
-                    </span>
-                  </td>
-                  <td className="p-4 text-right">
-                    <button onClick={() => toggleStatus(a.id, a.status)} className="p-2 bg-[#FAF8F5] dark:bg-[#1E1C1A] text-[#2C2825] dark:text-white border-[2px] border-[#2C2825] dark:border-[#EFEBE1] hover:bg-[#2C2825] hover:text-white transition-colors text-[10px] font-bold uppercase">
-                      Ubah Status
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="bg-white/5 border border-white/10 p-8 rounded-3xl backdrop-blur-xl w-full md:w-auto relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/20 blur-3xl rounded-full"></div>
+          <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">Aturan Presensi</h1>
+          <p className="text-sm font-medium text-white/50 mt-2">Konfigurasi jam kerja dan toleransi keterlambatan.</p>
         </div>
         
-        <button className="flex items-center gap-2 bg-[#386641] text-white px-6 py-3 border-[3px] border-[#2C2825] font-bold uppercase tracking-widest text-xs hover:bg-[#2C2825] transition-colors">
-          <Plus className="w-4 h-4" /> Tambah Aturan Baru
+        <button className="p-3 px-6 rounded-full border border-green-500/30 bg-green-500 text-black shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:bg-green-400 flex items-center gap-2 text-sm font-bold transition-all">
+          <Plus className="w-4 h-4" />
+          <span>Tambah Aturan</span>
         </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {isLoading ? (
+           <div className="col-span-full py-20 flex justify-center items-center text-white/50">
+              <Loader2 className="w-8 h-8 animate-spin text-green-400" />
+           </div>
+        ) : aturan.length === 0 ? (
+           <div className="col-span-full py-20 text-center text-white/50 bg-white/5 border border-white/10 rounded-3xl backdrop-blur-md">
+              <p className="text-sm font-medium">Belum ada aturan yang dibuat.</p>
+           </div>
+        ) : (
+          aturan.map((item) => (
+            <div key={item.id} className="bg-white/5 border border-white/10 p-6 rounded-3xl backdrop-blur-xl flex flex-col relative overflow-hidden group">
+              <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              
+              <div className="flex justify-between items-start mb-6 relative z-10">
+                <div className="flex items-center gap-3">
+                   <div className={`w-10 h-10 rounded-2xl flex items-center justify-center border transition-all ${item.is_active ? 'bg-green-500 text-black border-green-500/30 shadow-[0_0_15px_rgba(34,197,94,0.3)]' : 'bg-white/5 text-white/40 border-white/10'}`}>
+                      <Clock className="w-5 h-5" />
+                   </div>
+                   <div>
+                     <h3 className="text-lg font-bold text-white">{item.nama_aturan}</h3>
+                     <span className={`text-[10px] font-bold uppercase tracking-widest ${item.is_active ? 'text-green-400' : 'text-white/40'}`}>
+                       {item.is_active ? 'Status: Aktif' : 'Status: Nonaktif'}
+                     </span>
+                   </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 flex-1 relative z-10">
+                 <div className="flex justify-between border-b border-white/10 pb-2">
+                    <span className="text-xs font-medium text-white/50 uppercase tracking-widest">Jam Masuk</span>
+                    <span className="text-sm font-bold text-white">{item.jam_masuk?.substring(0,5)} WIB</span>
+                 </div>
+                 <div className="flex justify-between border-b border-white/10 pb-2">
+                    <span className="text-xs font-medium text-white/50 uppercase tracking-widest">Jam Keluar</span>
+                    <span className="text-sm font-bold text-white">{item.jam_keluar?.substring(0,5)} WIB</span>
+                 </div>
+                 <div className="flex justify-between border-b border-white/10 pb-2">
+                    <span className="text-xs font-medium text-white/50 uppercase tracking-widest">Toleransi</span>
+                    <span className="text-sm font-bold text-white">{item.toleransi_menit} Menit</span>
+                 </div>
+              </div>
+
+              <div className="flex gap-2 mt-8 pt-4 border-t border-white/10 relative z-10">
+                 <button 
+                   onClick={() => toggleStatus(item.id, item.is_active)}
+                   className={`flex-1 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all border ${
+                     item.is_active 
+                     ? 'bg-white/5 border-white/10 text-white/60 hover:text-white' 
+                     : 'bg-green-500/10 border-green-500/20 text-green-400 hover:bg-green-500 hover:text-black'
+                   }`}
+                 >
+                   <Power className="w-4 h-4" /> {item.is_active ? 'Nonaktifkan' : 'Aktifkan'}
+                 </button>
+                 <button 
+                   onClick={() => handleDelete(item.id)}
+                   className="w-10 h-10 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all"
+                 >
+                   <Trash2 className="w-4 h-4" />
+                 </button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

@@ -1,8 +1,7 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Webcam from 'react-webcam';
-import { ShieldCheck, User, ArrowRight, Camera, CheckCircle, RefreshCw, Upload, AlertCircle, Trash2, Mail, Lock } from 'lucide-react';
-import ThemeToggle from '../components/ThemeToggle';
+import { Camera, CheckCircle, RefreshCw, Upload, AlertCircle, Trash2, Mail, Lock, User, ArrowRight } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { registerFace } from '../lib/api';
 
@@ -31,13 +30,10 @@ export default function Auth() {
     setStatusMsg({ type: 'info', text: 'Mencoba masuk...' });
     
     try {
-      // Login dummy logic untuk demo (bisa diganti dengan supabase.auth.signInWithPassword)
-      // Karena kita hanya butuh pemisahan role:
       if (loginEmail === 'admin@sentrakreasi.com' && loginPassword === 'sentrakreasi123') {
         setStatusMsg({ type: 'success', text: 'Login Admin Berhasil!' });
         setTimeout(() => navigate('/admin'), 1000);
       } else {
-        // Cek apakah ada di pegawai
         const { data, error } = await supabase.from('pegawai').select('*').eq('email', loginEmail).single();
         if (data) {
           setStatusMsg({ type: 'success', text: 'Login Berhasil!' });
@@ -65,7 +61,7 @@ export default function Auth() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.nama || !formData.nip || !formData.email || !formData.password) {
-      setStatusMsg({ type: 'error', text: 'Semua field (Nama, NIP, Email, Password) harus diisi!' });
+      setStatusMsg({ type: 'error', text: 'Semua field harus diisi!' });
       return;
     }
     if (!capturedImages.depan || !capturedImages.kiri || !capturedImages.kanan) {
@@ -74,25 +70,19 @@ export default function Auth() {
     }
 
     setIsProcessing(true);
-    setStatusMsg({ type: 'info', text: '1/2 Menyimpan data ke Database Supabase...' });
+    setStatusMsg({ type: 'info', text: '1/2 Menyimpan data...' });
 
     try {
-      // 1. Simpan ke Supabase (tanpa Auth trigger untuk kemudahan demo)
       const { data: insertedData, error: insertErr } = await supabase
         .from('pegawai')
-        .insert([{ 
-          nama: formData.nama, 
-          nip: formData.nip, 
-          email: formData.email 
-        }])
+        .insert([{ nama: formData.nama, nip: formData.nip, email: formData.email }])
         .select()
         .single();
 
-      if (insertErr || !insertedData) throw new Error(insertErr?.message || 'Gagal menyimpan data pegawai. (Email/NIP mungkin sudah dipakai)');
+      if (insertErr || !insertedData) throw new Error(insertErr?.message || 'Gagal menyimpan data (Email/NIP sudah dipakai)');
       
-      setStatusMsg({ type: 'info', text: 'Data disimpan. 2/2 Memproses wajah ke AI...' });
+      setStatusMsg({ type: 'info', text: 'Data disimpan. 2/2 Memproses wajah...' });
 
-      // 2. Kirim ke FastAPI untuk Face Vectorization
       const images = [capturedImages.depan, capturedImages.kiri, capturedImages.kanan];
       await registerFace(insertedData.id, images);
       
@@ -114,115 +104,119 @@ export default function Auth() {
   };
 
   return (
-    <div className="relative min-h-screen bg-[#FAF8F5] dark:bg-[#151413] text-[#2C2825] dark:text-[#EFEBE1] font-sans overflow-y-auto transition-colors duration-300 p-4 md:p-8 selection:bg-[#386641] selection:text-white pb-20">
-      <div className="fixed inset-0 z-0 pointer-events-none bg-brutalist-grid opacity-60"></div>
+    <div className="relative min-h-screen bg-[#030712] text-white font-sans overflow-y-auto selection:bg-green-500 selection:text-white p-4 md:p-8 flex items-center justify-center">
       
-      <div className="absolute top-6 right-6 z-20 bg-white/50 dark:bg-black/50 backdrop-blur-sm border border-black/20 dark:border-white/20 p-2">
-        <ThemeToggle />
+      {/* Background Glow */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+         <div className="absolute top-1/4 left-1/4 w-[600px] h-[600px] bg-green-500/10 rounded-full blur-[120px] mix-blend-screen"></div>
+         <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-green-900/20 rounded-full blur-[100px] mix-blend-screen"></div>
       </div>
 
-      <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center pt-8">
-        <img src="/logo.png" alt="SentraKreasi" className="h-16 w-auto object-contain drop-shadow-sm mb-4" />
+      <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center">
+        <img onClick={() => navigate('/')} src="/logo.png" alt="SentraKreasi" className="h-12 w-auto object-contain brightness-200 opacity-80 hover:opacity-100 transition-opacity cursor-pointer mb-10" />
         
-        <div className="flex bg-[#EFEBE1] dark:bg-[#1E1C1A] border-[4px] border-[#2C2825] dark:border-[#EFEBE1] mb-8 w-full max-w-md">
-          <button onClick={() => setMode('login')} className={`flex-1 py-4 font-[Bebas_Neue] text-2xl uppercase tracking-widest transition-colors ${mode === 'login' ? 'bg-[#2C2825] text-white dark:bg-[#EFEBE1] dark:text-[#151413]' : 'text-[#2C2825] dark:text-[#EFEBE1] hover:bg-[#FAF8F5] dark:hover:bg-[#2A2621]'}`}>
+        <div className="flex bg-white/5 border border-white/10 rounded-full mb-10 w-full max-w-md p-1 backdrop-blur-md">
+          <button onClick={() => setMode('login')} className={`flex-1 py-3 px-6 rounded-full text-sm font-semibold transition-all ${mode === 'login' ? 'bg-green-500 text-black shadow-[0_0_20px_rgba(34,197,94,0.3)]' : 'text-white/60 hover:text-white'}`}>
             Masuk (Login)
           </button>
-          <div className="w-[4px] bg-[#2C2825] dark:bg-[#EFEBE1]"></div>
-          <button onClick={() => setMode('register')} className={`flex-1 py-4 font-[Bebas_Neue] text-2xl uppercase tracking-widest transition-colors ${mode === 'register' ? 'bg-[#2C2825] text-white dark:bg-[#EFEBE1] dark:text-[#151413]' : 'text-[#2C2825] dark:text-[#EFEBE1] hover:bg-[#FAF8F5] dark:hover:bg-[#2A2621]'}`}>
+          <button onClick={() => setMode('register')} className={`flex-1 py-3 px-6 rounded-full text-sm font-semibold transition-all ${mode === 'register' ? 'bg-green-500 text-black shadow-[0_0_20px_rgba(34,197,94,0.3)]' : 'text-white/60 hover:text-white'}`}>
             Daftar Baru
           </button>
         </div>
 
         {mode === 'login' ? (
-          <form onSubmit={handleLogin} className="w-full max-w-md bg-[#FAF8F5] dark:bg-[#2A2621] border-[6px] border-[#2C2825] dark:border-[#EFEBE1] p-8 space-y-6">
-             <h2 className="font-[Bebas_Neue] text-4xl text-center uppercase tracking-wide mb-6 text-[#2C2825] dark:text-[#EFEBE1]">Autentikasi Sistem</h2>
+          <form onSubmit={handleLogin} className="w-full max-w-md bg-white/5 border border-white/10 p-8 md:p-10 rounded-3xl backdrop-blur-xl shadow-2xl">
+             <div className="text-center mb-8">
+               <h2 className="text-3xl font-bold tracking-tight mb-2">Selamat Datang</h2>
+               <p className="text-sm text-white/50">Masukkan kredensial untuk mengakses sistem.</p>
+             </div>
              
-             <div className="space-y-4">
+             <div className="space-y-5">
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1] block mb-2">Email</label>
+                  <label className="text-xs font-medium text-white/70 block mb-2">Alamat Email</label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#2C2825] dark:text-[#EFEBE1]" />
-                    <input type="email" required value={loginEmail} onChange={e => setLoginEmail(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-[#EFEBE1] dark:bg-[#151413] border-[3px] border-[#2C2825] dark:border-[#EFEBE1] font-bold text-[#2C2825] dark:text-[#EFEBE1] focus:outline-none" />
+                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+                    <input type="email" required value={loginEmail} onChange={e => setLoginEmail(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 transition-all" placeholder="email@contoh.com" />
                   </div>
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1] block mb-2">Kata Sandi</label>
+                  <label className="text-xs font-medium text-white/70 block mb-2">Kata Sandi</label>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#2C2825] dark:text-[#EFEBE1]" />
-                    <input type="password" required value={loginPassword} onChange={e => setLoginPassword(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-[#EFEBE1] dark:bg-[#151413] border-[3px] border-[#2C2825] dark:border-[#EFEBE1] font-bold text-[#2C2825] dark:text-[#EFEBE1] focus:outline-none" />
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
+                    <input type="password" required value={loginPassword} onChange={e => setLoginPassword(e.target.value)} className="w-full pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-sm text-white placeholder-white/30 focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 transition-all" placeholder="••••••••" />
                   </div>
                 </div>
              </div>
 
              {statusMsg && mode === 'login' && (
-                <div className={`p-4 border-[3px] border-[#2C2825] text-xs font-bold uppercase flex items-center gap-2 ${statusMsg.type === 'success' ? 'bg-[#386641] text-white' : 'bg-[#E36D4F] text-white'}`}>
+                <div className={`mt-6 p-4 rounded-2xl text-sm flex items-center gap-3 ${statusMsg.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
                    {statusMsg.type === 'info' && <RefreshCw className="w-4 h-4 animate-spin" />}
+                   {statusMsg.type === 'success' && <CheckCircle className="w-4 h-4" />}
+                   {statusMsg.type === 'error' && <AlertCircle className="w-4 h-4" />}
                    {statusMsg.text}
                 </div>
              )}
 
-             <button type="submit" disabled={isProcessing} className="w-full p-4 bg-[#386641] text-white font-[Bebas_Neue] text-3xl uppercase tracking-widest hover:bg-[#2C2825] transition-colors border-[4px] border-[#2C2825] dark:border-[#EFEBE1] disabled:opacity-50">
-               {isProcessing ? 'Memproses...' : 'Masuk Sekarang'}
+             <button type="submit" disabled={isProcessing} className="w-full mt-8 p-4 bg-green-500 text-black rounded-full text-sm font-bold flex items-center justify-center gap-2 hover:bg-green-400 shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+               {isProcessing ? <><RefreshCw className="w-4 h-4 animate-spin" /> Memproses...</> : 'Masuk Sekarang'}
              </button>
           </form>
         ) : (
           <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Kolom Kiri: Form & Kamera */}
             <div className="space-y-6">
-              <div className="bg-[#FAF8F5] dark:bg-[#2A2621] border-[4px] border-[#2C2825] dark:border-[#EFEBE1] p-6 space-y-4">
+              <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl space-y-5">
+                <h3 className="text-xl font-bold mb-6">Data Diri Pribadi</h3>
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-widest block mb-2">Nama Lengkap</label>
-                  <input type="text" value={formData.nama} onChange={e => setFormData({ ...formData, nama: e.target.value })} className="w-full bg-[#EFEBE1] dark:bg-[#151413] border-[3px] border-[#2C2825] dark:border-[#EFEBE1] p-3 font-bold focus:outline-none" />
+                  <label className="text-xs font-medium text-white/70 block mb-2">Nama Lengkap</label>
+                  <input type="text" value={formData.nama} onChange={e => setFormData({ ...formData, nama: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-green-500/50 transition-all" placeholder="Masukkan nama" />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-widest block mb-2">NIP / ID Unik</label>
-                  <input type="text" value={formData.nip} onChange={e => setFormData({ ...formData, nip: e.target.value })} className="w-full bg-[#EFEBE1] dark:bg-[#151413] border-[3px] border-[#2C2825] dark:border-[#EFEBE1] p-3 font-bold focus:outline-none" />
+                  <label className="text-xs font-medium text-white/70 block mb-2">NIP / ID Unik</label>
+                  <input type="text" value={formData.nip} onChange={e => setFormData({ ...formData, nip: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-green-500/50 transition-all" placeholder="Nomor Induk" />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-widest block mb-2">Email</label>
-                  <input type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} className="w-full bg-[#EFEBE1] dark:bg-[#151413] border-[3px] border-[#2C2825] dark:border-[#EFEBE1] p-3 font-bold focus:outline-none" />
+                  <label className="text-xs font-medium text-white/70 block mb-2">Email</label>
+                  <input type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-green-500/50 transition-all" placeholder="email@contoh.com" />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold uppercase tracking-widest block mb-2">Kata Sandi</label>
-                  <input type="password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} className="w-full bg-[#EFEBE1] dark:bg-[#151413] border-[3px] border-[#2C2825] dark:border-[#EFEBE1] p-3 font-bold focus:outline-none" />
+                  <label className="text-xs font-medium text-white/70 block mb-2">Kata Sandi</label>
+                  <input type="password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-2xl p-4 text-sm focus:outline-none focus:border-green-500/50 transition-all" placeholder="••••••••" />
                 </div>
               </div>
 
-              <div className="bg-[#EFEBE1] dark:bg-[#1E1C1A] border-[4px] border-[#2C2825] dark:border-[#EFEBE1] p-2 relative aspect-[4/3]">
-                 <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg" className="object-cover w-full h-full" videoConstraints={{ facingMode: "user" }} />
-                 <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
-                    <span className="bg-[#FAF8F5] text-[#2C2825] border-[2px] border-[#2C2825] px-3 py-1 text-[10px] font-bold uppercase tracking-widest">Kamera Registrasi</span>
-                    <button type="button" onClick={handleCapture} className="bg-[#386641] text-white border-[2px] border-[#2C2825] px-4 py-2 text-xs font-bold uppercase hover:bg-[#2C2825] transition-colors flex items-center gap-2">
-                      <Camera className="w-4 h-4" /> Tangkap Sisi {activeAngle.toUpperCase()}
+              <div className="bg-black border border-white/10 rounded-3xl p-2 relative aspect-[4/3] overflow-hidden">
+                 <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg" className="object-cover w-full h-full rounded-2xl" videoConstraints={{ facingMode: "user" }} />
+                 <div className="absolute bottom-6 left-6 right-6 flex justify-between items-center z-10">
+                    <span className="bg-black/50 backdrop-blur-md text-white/80 border border-white/10 px-3 py-1 rounded-full text-xs font-medium">Kamera Aktif</span>
+                    <button type="button" onClick={handleCapture} className="bg-green-500 text-black px-4 py-2 rounded-full text-sm font-bold shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:bg-green-400 transition-all flex items-center gap-2">
+                      <Camera className="w-4 h-4" /> Tangkap {activeAngle}
                     </button>
                  </div>
               </div>
             </div>
 
-            {/* Kolom Kanan: Preview Sudut */}
             <div className="space-y-6 flex flex-col">
-              <div className="bg-[#FAF8F5] dark:bg-[#2A2621] border-[4px] border-[#2C2825] dark:border-[#EFEBE1] p-6 flex-1 flex flex-col">
-                 <h3 className="font-[Bebas_Neue] text-3xl uppercase border-b-[3px] border-[#2C2825] dark:border-[#EFEBE1] pb-4 mb-6">Pratinjau 3 Sudut Wajah</h3>
+              <div className="bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl flex-1 flex flex-col">
+                 <h3 className="text-xl font-bold mb-6">Perekaman 3 Sudut</h3>
                  
                  <div className="space-y-4 flex-1">
                     {(['depan', 'kiri', 'kanan'] as const).map((angle) => (
-                       <div key={angle} className={`border-[3px] p-3 flex items-center gap-4 transition-colors ${activeAngle === angle ? 'border-[#386641] bg-[#386641]/10' : 'border-[#2C2825] dark:border-[#EFEBE1] bg-[#EFEBE1] dark:bg-[#151413]'}`}>
-                          <div className="w-20 h-20 border-[2px] border-[#2C2825] dark:border-[#EFEBE1] bg-[#FAF8F5] dark:bg-[#2A2621] overflow-hidden flex items-center justify-center shrink-0">
+                       <div key={angle} className={`border p-4 rounded-2xl flex items-center gap-4 transition-all ${activeAngle === angle ? 'border-green-500/50 bg-green-500/5' : 'border-white/10 bg-white/5'}`}>
+                          <div className="w-16 h-16 rounded-xl border border-white/10 bg-black/50 overflow-hidden flex items-center justify-center shrink-0">
                              {capturedImages[angle] ? (
                                 <img src={capturedImages[angle] as string} alt={angle} className="object-cover w-full h-full" />
                              ) : (
-                                <span className="text-[10px] font-bold text-[#A89886] uppercase">KOSONG</span>
+                                <User className="w-6 h-6 text-white/20" />
                              )}
                           </div>
                           <div className="flex-1">
-                             <h4 className="font-[Bebas_Neue] text-2xl uppercase">Sisi {angle}</h4>
-                             <p className="text-[10px] font-bold uppercase text-[#6B5A4B] dark:text-[#A89886]">
+                             <h4 className="font-semibold text-sm capitalize">Sisi {angle}</h4>
+                             <p className="text-xs text-white/50">
                                 {capturedImages[angle] ? 'Tertangkap' : 'Menunggu Kamera'}
                              </p>
                           </div>
                           {capturedImages[angle] && (
-                             <button type="button" onClick={() => { setCapturedImages(prev => ({...prev, [angle]: null})); setActiveAngle(angle); }} className="p-2 bg-[#E36D4F] text-white border-[2px] border-[#2C2825] hover:bg-[#2C2825]">
+                             <button type="button" onClick={() => { setCapturedImages(prev => ({...prev, [angle]: null})); setActiveAngle(angle); }} className="p-2 rounded-full bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors">
                                 <Trash2 className="w-4 h-4" />
                              </button>
                           )}
@@ -231,10 +225,10 @@ export default function Auth() {
                  </div>
 
                  {statusMsg && mode === 'register' && (
-                    <div className={`mt-6 p-4 border-[3px] border-[#2C2825] text-xs font-bold uppercase tracking-widest flex items-center gap-3 ${statusMsg.type === 'success' ? 'bg-[#386641] text-white' : statusMsg.type === 'error' ? 'bg-[#E36D4F] text-white' : 'bg-[#EFEBE1] text-[#2C2825]'}`}>
-                       {statusMsg.type === 'error' && <AlertCircle className="w-5 h-5" />}
-                       {statusMsg.type === 'success' && <CheckCircle className="w-5 h-5" />}
-                       {statusMsg.type === 'info' && <RefreshCw className="w-5 h-5 animate-spin" />}
+                    <div className={`mt-6 p-4 rounded-2xl text-sm flex items-center gap-3 ${statusMsg.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : statusMsg.type === 'error' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-white/10 text-white/80 border border-white/10'}`}>
+                       {statusMsg.type === 'error' && <AlertCircle className="w-4 h-4" />}
+                       {statusMsg.type === 'success' && <CheckCircle className="w-4 h-4" />}
+                       {statusMsg.type === 'info' && <RefreshCw className="w-4 h-4 animate-spin" />}
                        {statusMsg.text}
                     </div>
                  )}
@@ -242,13 +236,9 @@ export default function Auth() {
                  <button 
                     onClick={handleRegister}
                     disabled={isProcessing || !capturedImages.depan || !capturedImages.kiri || !capturedImages.kanan}
-                    className={`mt-6 w-full p-4 font-[Bebas_Neue] text-3xl uppercase flex items-center justify-center gap-3 border-[4px] border-[#2C2825] dark:border-[#EFEBE1] transition-colors ${
-                       isProcessing || (!capturedImages.depan || !capturedImages.kiri || !capturedImages.kanan) 
-                       ? 'bg-[#EFEBE1] dark:bg-[#1E1C1A] text-[#A89886] cursor-not-allowed'
-                       : 'bg-[#386641] text-white hover:bg-[#2C2825]'
-                    }`}
+                    className="w-full mt-6 p-4 bg-green-500 text-black rounded-full text-sm font-bold flex items-center justify-center gap-2 hover:bg-green-400 shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                  >
-                    {isProcessing ? <><RefreshCw className="w-6 h-6 animate-spin mt-1" /> Memproses...</> : <><Upload className="w-6 h-6 mt-1" /> Daftar & Rekam Wajah</>}
+                    {isProcessing ? <><RefreshCw className="w-4 h-4 animate-spin" /> Memproses...</> : <><Upload className="w-4 h-4" /> Buat Akun & Registrasi Wajah</>}
                  </button>
               </div>
             </div>

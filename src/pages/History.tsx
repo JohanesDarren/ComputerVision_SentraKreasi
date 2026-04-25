@@ -3,12 +3,6 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { format } from 'date-fns';
 import { id as localeID } from 'date-fns/locale';
-const getExpressionIcon = (expr: string) => {
-  if (expr === 'Ceria') return <Smile className="w-5 h-5 text-[#2C2825] dark:text-[#EFEBE1]" />;
-  if (expr === 'Fokus') return <Target className="w-5 h-5 text-[#2C2825] dark:text-[#EFEBE1]" />;
-  if (expr === 'Lelah') return <BatteryMedium className="w-5 h-5 text-[#E36D4F]" />;
-  return <Meh className="w-5 h-5 text-[#6B5A4B] dark:text-[#A89886]" />;
-};
 
 export default function History() {
   const [historyData, setHistoryData] = useState<any[]>([]);
@@ -19,116 +13,108 @@ export default function History() {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('presensi')
-        .select(`
-          id,
-          waktu_hadir,
-          status,
-          pegawai:pegawai_id (
-            nama,
-            nip
-          )
-        `)
+        .select(`id, waktu_hadir, status, pegawai:pegawai_id (nama, nip)`)
         .order('waktu_hadir', { ascending: false })
         .limit(20);
 
-      if (error) {
-        console.error('Error fetching history:', error);
-      } else {
-        setHistoryData(data || []);
-      }
+      if (error) console.error('Error fetching history:', error);
+      else setHistoryData(data || []);
       setIsLoading(false);
     }
-
     fetchHistory();
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
-        <div className="bg-[#FAF8F5] dark:bg-[#2A2621] border-[4px] border-[#2C2825] dark:border-[#EFEBE1] p-6 w-full md:w-auto">
-          <h1 className="font-[Bebas_Neue] text-5xl tracking-wide uppercase text-[#2C2825] dark:text-[#EFEBE1]">Riwayat Presensi</h1>
-          <p className="text-[10px] font-bold text-[#6B5A4B] dark:text-[#A89886] uppercase tracking-widest mt-2 border-t-[3px] border-[#2C2825] dark:border-[#EFEBE1] pt-4">Catatan dan log waktu kehadiran terpadu.</p>
+    <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8 text-white relative">
+      
+      {/* Background Glows */}
+      <div className="absolute top-1/4 left-0 w-[400px] h-[400px] bg-green-500/20 rounded-full blur-[150px] pointer-events-none -z-10 mix-blend-screen"></div>
+
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4 relative z-10">
+        <div className="bg-white/5 border border-white/10 p-8 rounded-3xl backdrop-blur-xl w-full md:w-auto relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-32 h-32 bg-green-500/20 blur-3xl rounded-full"></div>
+          <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 relative z-10">Riwayat Presensi</h1>
+          <p className="text-sm font-medium text-white/50 mt-2 relative z-10">Catatan dan log waktu kehadiran terpadu.</p>
         </div>
         
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-[#6B5A4B] dark:text-[#A89886]" />
+            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
             <input 
               type="text" 
               placeholder="Cari..." 
-              className="pl-12 pr-4 py-4 border-[4px] border-[#2C2825] dark:border-[#EFEBE1] bg-[#EFEBE1] dark:bg-[#151413] text-sm focus:outline-none focus:bg-[#FAF8F5] dark:focus:bg-[#1E1C1A] text-[#2C2825] dark:text-[#EFEBE1] font-bold uppercase tracking-widest placeholder-[#A89886] w-full md:w-48 lg:w-64 transition-all"
+              className="pl-12 pr-4 py-3 rounded-full border border-white/10 bg-white/5 text-sm focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 text-white placeholder-white/40 w-full md:w-48 lg:w-64 transition-all backdrop-blur-md shadow-inner"
             />
           </div>
-          <button className="p-4 px-6 border-[4px] border-[#2C2825] dark:border-[#EFEBE1] bg-[#EFEBE1] dark:bg-[#151413] hover:bg-[#386641] hover:text-white dark:hover:bg-[#386641] flex items-center gap-2 text-sm font-[Bebas_Neue] tracking-wider text-[#2C2825] dark:text-[#EFEBE1] transition-colors uppercase">
-            <Filter className="w-5 h-5 mb-0.5" />
+          <button className="p-3 px-6 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 flex items-center gap-2 text-sm font-semibold text-white transition-all backdrop-blur-md">
+            <Filter className="w-4 h-4" />
             <span className="hidden sm:inline">Filter</span>
           </button>
         </div>
       </div>
 
-      <div className="bg-[#FAF8F5] dark:bg-[#2A2621] border-[4px] border-[#2C2825] dark:border-[#EFEBE1] overflow-hidden flex flex-col transition-colors">
-        <div className="p-5 border-b-[4px] border-[#2C2825] dark:border-[#EFEBE1] bg-[#EFEBE1] dark:bg-[#151413]">
-           <h3 className="font-[Bebas_Neue] text-2xl text-[#2C2825] dark:text-[#EFEBE1] uppercase tracking-wide">Log Area Pindai</h3>
+      <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden flex flex-col transition-colors backdrop-blur-xl relative z-10">
+        <div className="p-6 border-b border-white/10 bg-white/5">
+           <h3 className="text-lg font-semibold text-white">Log Area Pindai</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
-              <tr className="bg-[#EFEBE1] dark:bg-[#1E1C1A] border-b-[4px] border-[#2C2825] dark:border-[#EFEBE1]">
-                <th className="py-4 px-6 font-[Bebas_Neue] text-xl text-[#2C2825] dark:text-[#EFEBE1] uppercase tracking-widest">Profil</th>
-                <th className="py-4 px-6 font-[Bebas_Neue] text-xl text-[#2C2825] dark:text-[#EFEBE1] uppercase tracking-widest">Waktu</th>
-                <th className="py-4 px-6 font-[Bebas_Neue] text-xl text-[#2C2825] dark:text-[#EFEBE1] uppercase tracking-widest">Status</th>
-                <th className="py-4 px-6 font-[Bebas_Neue] text-xl text-[#2C2825] dark:text-[#EFEBE1] uppercase tracking-widest">Metode</th>
-                <th className="py-4 px-6 font-[Bebas_Neue] text-xl text-[#2C2825] dark:text-[#EFEBE1] uppercase tracking-widest">Ekspresi</th>
+              <tr className="border-b border-white/10">
+                <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-widest">Profil</th>
+                <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-widest">Waktu</th>
+                <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-widest">Status</th>
+                <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-widest">Metode</th>
+                <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-widest">Ekspresi</th>
               </tr>
             </thead>
-            <tbody className="divide-y-[3px] divide-[#2C2825] dark:divide-[#EFEBE1] bg-[#FAF8F5] dark:bg-[#2A2621]">
+            <tbody className="divide-y divide-white/5">
               {isLoading ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-[#2C2825] dark:text-[#EFEBE1]">
-                    <div className="flex justify-center items-center gap-3 font-[Bebas_Neue] text-2xl tracking-widest uppercase">
-                      <Loader2 className="w-8 h-8 animate-spin text-[#386641]" />
-                      Memuat Data...
+                  <td colSpan={5} className="py-16 text-center text-white/50">
+                    <div className="flex justify-center items-center gap-3 text-sm font-semibold">
+                      <Loader2 className="w-5 h-5 animate-spin text-green-400" /> Memuat Data...
                     </div>
                   </td>
                 </tr>
               ) : historyData.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 text-center text-[#2C2825] dark:text-[#EFEBE1]">
-                    <div className="font-[Bebas_Neue] text-2xl tracking-widest uppercase text-[#6B5A4B] dark:text-[#A89886]">Belum ada riwayat presensi</div>
+                  <td colSpan={5} className="py-16 text-center text-white/50">
+                    <div className="text-sm font-semibold">Belum ada riwayat presensi</div>
                   </td>
                 </tr>
               ) : historyData.map((item) => (
-                <tr key={item.id} className="hover:bg-[#EFEBE1] dark:hover:bg-[#151413] transition-colors">
+                <tr key={item.id} className="hover:bg-white/5 transition-colors group">
                   <td className="py-4 px-6 flex items-center gap-4">
-                    <div className={`w-12 h-12 flex items-center justify-center font-[Bebas_Neue] text-xl bg-[#386641] text-white border-[2px] border-[#2C2825] dark:border-[#EFEBE1]`}>
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-green-500/10 text-green-400 border border-green-500/20 group-hover:bg-green-500 group-hover:text-black transition-colors">
                        {item.pegawai?.nama?.substring(0, 2).toUpperCase() || '??'}
                     </div>
                     <div>
-                       <p className="text-sm font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">{item.pegawai?.nama || 'Unknown'}</p>
-                       <p className="text-[10px] uppercase font-bold text-[#6B5A4B] dark:text-[#A89886] mt-1">{item.pegawai?.nip || '-'}</p>
+                       <p className="text-sm font-semibold text-white">{item.pegawai?.nama || 'Unknown'}</p>
+                       <p className="text-xs font-medium text-white/40 mt-0.5">{item.pegawai?.nip || '-'}</p>
                     </div>
                   </td>
-                  <td className="py-4 px-6 border-l-[3px] border-[#2C2825] dark:border-[#EFEBE1]">
-                    <div className="font-[Bebas_Neue] text-2xl text-[#2C2825] dark:text-[#EFEBE1]">
+                  <td className="py-4 px-6">
+                    <div className="text-lg font-bold text-white">
                       {item.waktu_hadir ? format(new Date(item.waktu_hadir), 'HH:mm') : '-'}
                     </div>
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase text-[#6B5A4B] dark:text-[#A89886] mt-1">
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-white/40 mt-0.5">
                        <Calendar className="w-3 h-3" />
                        {item.waktu_hadir ? format(new Date(item.waktu_hadir), 'dd MMM yyyy', { locale: localeID }) : '-'}
                     </div>
                   </td>
-                  <td className="py-4 px-6 border-l-[3px] border-[#2C2825] dark:border-[#EFEBE1]">
-                    <span className={`inline-flex items-center px-4 py-2 text-[10px] tracking-widest uppercase font-bold border-[2px] border-[#2C2825] dark:border-[#EFEBE1]
-                      ${item.status === 'hadir' ? 'bg-[#386641] text-white' : 'bg-[#E36D4F] text-white'}
+                  <td className="py-4 px-6">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border
+                      ${item.status === 'hadir' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}
                     `}>
                       {item.status}
                     </span>
                   </td>
-                  <td className="py-4 px-6 text-xs uppercase font-bold text-[#2C2825] dark:text-[#EFEBE1] border-l-[3px] border-[#2C2825] dark:border-[#EFEBE1]">Wajah (AI)</td>
-                  <td className="py-4 px-6 border-l-[3px] border-[#2C2825] dark:border-[#EFEBE1]">
-                    <div className="flex items-center gap-3 bg-[#EFEBE1] dark:bg-[#151413] px-3 py-2 border-[2px] border-[#2C2825] dark:border-[#EFEBE1] w-max">
-                       <Smile className="w-5 h-5 text-[#2C2825] dark:text-[#EFEBE1]" />
-                       <span className="text-[10px] uppercase font-bold tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">Terdeteksi</span>
+                  <td className="py-4 px-6 text-sm font-medium text-white/70">Wajah (AI)</td>
+                  <td className="py-4 px-6">
+                    <div className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-full border border-white/10 w-max group-hover:bg-green-500/10 group-hover:border-green-500/30 group-hover:text-green-400 transition-colors">
+                       <Smile className="w-4 h-4" />
+                       <span className="text-xs font-semibold">Terdeteksi</span>
                     </div>
                   </td>
                 </tr>
@@ -137,11 +123,11 @@ export default function History() {
           </table>
         </div>
         
-        <div className="p-5 bg-[#EFEBE1] dark:bg-[#1E1C1A] border-t-[4px] border-[#2C2825] dark:border-[#EFEBE1] flex items-center justify-between">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-[#6B5A4B] dark:text-[#A89886]">Menampilkan 5 entri terakhir</span>
-          <div className="flex gap-4">
-            <button className="px-5 py-3 border-[3px] border-[#2C2825] dark:border-[#EFEBE1] text-[10px] uppercase font-bold text-[#2C2825] dark:text-[#EFEBE1] hover:bg-[#386641] hover:text-white transition-colors bg-[#FAF8F5] dark:bg-[#2A2621]">Sebelumnya</button>
-            <button className="px-5 py-3 border-[3px] border-[#2C2825] dark:border-[#EFEBE1] text-[10px] uppercase font-bold text-[#2C2825] dark:text-[#EFEBE1] hover:bg-[#386641] hover:text-white transition-colors bg-[#FAF8F5] dark:bg-[#2A2621]">Selanjutnya</button>
+        <div className="p-5 bg-white/5 border-t border-white/10 flex items-center justify-between">
+          <span className="text-xs font-medium text-white/40">Menampilkan 20 entri terakhir</span>
+          <div className="flex gap-2">
+            <button className="px-4 py-2 rounded-full border border-white/10 text-xs font-semibold text-white/70 hover:bg-white/10 hover:text-white transition-all">Sebelumnya</button>
+            <button className="px-4 py-2 rounded-full border border-white/10 text-xs font-semibold text-white/70 hover:bg-white/10 hover:text-white transition-all">Selanjutnya</button>
           </div>
         </div>
       </div>

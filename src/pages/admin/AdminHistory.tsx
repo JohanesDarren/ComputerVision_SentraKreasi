@@ -1,95 +1,136 @@
-import { useState, useEffect } from 'react';
+import { Calendar, Search, Filter, Loader2, Download } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { CalendarClock, RefreshCw } from 'lucide-react';
 import { format } from 'date-fns';
-import { id } from 'date-fns/locale';
+import { id as localeID } from 'date-fns/locale';
 
 export default function AdminHistory() {
-  const [history, setHistory] = useState<any[]>([]);
+  const [historyData, setHistoryData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchHistory = async () => {
-    setIsLoading(true);
-    try {
+  useEffect(() => {
+    async function fetchHistory() {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('presensi')
         .select(`
           id,
           waktu_hadir,
           status,
-          pegawai (
+          pegawai:pegawai_id (
             nama,
             nip
           )
         `)
         .order('waktu_hadir', { ascending: false });
-      
-      if (error) throw error;
-      setHistory(data || []);
-    } catch (err) {
-      console.error("Gagal memuat history:", err);
-    } finally {
+
+      if (error) console.error('Error fetching history:', error);
+      else setHistoryData(data || []);
       setIsLoading(false);
     }
-  };
 
-  useEffect(() => {
     fetchHistory();
   }, []);
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto h-full space-y-6 animate-in fade-in slide-in-from-bottom-4">
-      <div className="bg-[#FAF8F5] dark:bg-[#2A2621] border-[4px] border-[#2C2825] dark:border-[#EFEBE1] rounded-none p-6 md:p-8">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-             <h1 className="font-[Bebas_Neue] text-5xl tracking-wide text-[#2C2825] dark:text-[#EFEBE1] uppercase mb-2">Riwayat Global (Database)</h1>
-             <p className="text-[10px] font-bold uppercase tracking-widest text-[#6B5A4B] dark:text-[#A89886] border-t-[3px] border-[#2C2825] dark:border-[#EFEBE1] pt-4">
-               Semua aktivitas dan log presensi biometrik yang tercatat di Supabase.
-             </p>
+    <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8 text-white relative">
+      <div className="absolute top-1/4 right-0 w-[400px] h-[400px] bg-green-500/20 rounded-full blur-[150px] pointer-events-none -z-10 mix-blend-screen"></div>
+
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4 relative z-10">
+        <div className="bg-white/5 border border-white/10 p-8 rounded-3xl backdrop-blur-xl w-full md:w-auto relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-green-500/20 blur-3xl rounded-full"></div>
+          <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60 relative z-10">Log Aktivitas (Global)</h1>
+          <p className="text-sm font-medium text-white/50 mt-2 relative z-10">Pantau seluruh riwayat presensi dari semua pengguna.</p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
+            <input 
+              type="text" 
+              placeholder="Cari NIP / Nama..." 
+              className="pl-12 pr-4 py-3 rounded-full border border-white/10 bg-white/5 text-sm focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 text-white placeholder-white/40 w-full md:w-48 lg:w-64 transition-all backdrop-blur-md shadow-inner"
+            />
           </div>
-          <button onClick={fetchHistory} className="p-3 bg-[#EFEBE1] border-[3px] border-[#2C2825] hover:bg-[#2C2825] hover:text-white transition-colors group">
-            <RefreshCw className={`w-5 h-5 text-[#2C2825] group-hover:text-white ${isLoading ? 'animate-spin' : ''}`} />
+          <button className="p-3 px-6 rounded-full border border-green-500/30 bg-green-500 text-black shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:bg-green-400 flex items-center gap-2 text-sm font-bold transition-all">
+            <Download className="w-4 h-4" />
+            <span className="hidden sm:inline">Export CSV</span>
           </button>
         </div>
+      </div>
 
-        <div className="overflow-x-auto border-[3px] border-[#2C2825] dark:border-[#EFEBE1] bg-white dark:bg-[#151413]">
-          <table className="w-full text-left border-collapse">
+      <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden flex flex-col transition-colors backdrop-blur-xl relative z-10">
+        <div className="p-6 border-b border-white/10 bg-white/5 flex justify-between items-center">
+           <h3 className="text-lg font-semibold text-white">Semua Data Presensi</h3>
+           <button className="text-xs font-semibold text-white/50 hover:text-white flex items-center gap-1 transition-colors"><Filter className="w-3 h-3"/> Filter Canggih</button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
-              <tr className="bg-[#EFEBE1] dark:bg-[#1E1C1A] border-b-[3px] border-[#2C2825] dark:border-[#EFEBE1]">
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">Tanggal & Waktu</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">Nama Pegawai</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">NIP</th>
-                <th className="p-4 text-[10px] font-bold uppercase tracking-widest text-[#2C2825] dark:text-[#EFEBE1]">Status</th>
+              <tr className="border-b border-white/10 bg-black/20">
+                <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-widest">Profil</th>
+                <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-widest">Waktu</th>
+                <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-widest">Status</th>
+                <th className="py-4 px-6 text-xs font-semibold text-white/50 uppercase tracking-widest text-right">Detail</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-white/5">
               {isLoading ? (
-                <tr><td colSpan={4} className="p-8 text-center text-sm font-bold uppercase tracking-widest animate-pulse">Memuat Data...</td></tr>
-              ) : history.length === 0 ? (
-                <tr><td colSpan={4} className="p-8 text-center text-sm font-bold uppercase tracking-widest">Belum ada riwayat presensi.</td></tr>
-              ) : history.map((log) => (
-                <tr key={log.id} className="border-b-[2px] border-[#2C2825] dark:border-[#2A2621] hover:bg-[#FAF8F5] dark:hover:bg-[#2A2621] transition-colors">
-                  <td className="p-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-[#2C2825] flex items-center justify-center border-[2px] border-[#EFEBE1]">
-                        <CalendarClock className="w-4 h-4 text-white" />
-                      </div>
-                      <span className="font-bold text-[#2C2825] dark:text-[#EFEBE1] uppercase text-sm">
-                        {format(new Date(log.waktu_hadir), 'dd MMM yyyy, HH:mm:ss', { locale: id })}
-                      </span>
+                <tr>
+                  <td colSpan={4} className="py-16 text-center text-white/50">
+                    <div className="flex justify-center items-center gap-3 text-sm font-semibold">
+                      <Loader2 className="w-5 h-5 animate-spin text-green-400" /> Memuat Data...
                     </div>
                   </td>
-                  <td className="p-4 text-sm font-bold text-[#2C2825] dark:text-[#EFEBE1] uppercase">{log.pegawai?.nama || 'Unknown'}</td>
-                  <td className="p-4 text-sm font-bold text-[#6B5A4B] dark:text-[#A89886]">{log.pegawai?.nip || '-'}</td>
-                  <td className="p-4">
-                    <span className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider border-[2px] border-[#2C2825] ${log.status === 'hadir' ? 'bg-[#386641] text-white' : 'bg-[#E36D4F] text-white'}`}>
-                      {log.status}
+                </tr>
+              ) : historyData.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-16 text-center text-white/50">
+                    <div className="text-sm font-semibold">Belum ada log presensi sama sekali.</div>
+                  </td>
+                </tr>
+              ) : historyData.map((item) => (
+                <tr key={item.id} className="hover:bg-white/5 transition-colors group">
+                  <td className="py-4 px-6 flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-white/10 text-white/80 border border-white/10 group-hover:bg-green-500 group-hover:text-black transition-colors">
+                       {item.pegawai?.nama?.substring(0, 2).toUpperCase() || '??'}
+                    </div>
+                    <div>
+                       <p className="text-sm font-semibold text-white">{item.pegawai?.nama || 'Unknown'}</p>
+                       <p className="text-xs font-medium text-white/40 mt-0.5">{item.pegawai?.nip || '-'}</p>
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className="text-lg font-bold text-white">
+                      {item.waktu_hadir ? format(new Date(item.waktu_hadir), 'HH:mm') : '-'}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs font-medium text-white/40 mt-0.5">
+                       <Calendar className="w-3 h-3" />
+                       {item.waktu_hadir ? format(new Date(item.waktu_hadir), 'dd MMM yyyy', { locale: localeID }) : '-'}
+                    </div>
+                  </td>
+                  <td className="py-4 px-6">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border
+                      ${item.status === 'hadir' ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}
+                    `}>
+                      {item.status}
                     </span>
+                  </td>
+                  <td className="py-4 px-6 text-right">
+                    <button className="px-4 py-2 rounded-full border border-white/10 text-xs font-semibold text-white/70 hover:bg-white/10 hover:text-white transition-all">Lihat Log</button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+        
+        <div className="p-5 bg-white/5 border-t border-white/10 flex items-center justify-between">
+          <span className="text-xs font-medium text-white/40">Total Record: {historyData.length}</span>
+          <div className="flex gap-2">
+            <button className="px-4 py-2 rounded-full border border-white/10 text-xs font-semibold text-white/70 hover:bg-white/10 hover:text-white transition-all">Prev</button>
+            <button className="px-4 py-2 rounded-full border border-white/10 text-xs font-semibold text-white/70 hover:bg-white/10 hover:text-white transition-all">Next</button>
+          </div>
         </div>
       </div>
     </div>
