@@ -15,7 +15,10 @@ export default function Dashboard() {
     async function loadData() {
       setIsLoading(true);
       try {
-        const { data: pData } = await supabase.from('pegawai').select('*').limit(1).single();
+        const userId = localStorage.getItem('user_id');
+        if (!userId) return;
+        
+        const { data: pData } = await supabase.from('pegawai').select('*').eq('id', userId).single();
         if (pData) {
           setPegawai(pData);
           
@@ -35,7 +38,7 @@ export default function Dashboard() {
             .from('presensi')
             .select('*', { count: 'exact', head: true })
             .eq('pegawai_id', pData.id)
-            .eq('status', 'hadir');
+            .in('status', ['masuk', 'hadir', 'telat']);
             
           setStats({ 
             totalHadir: count || 0, 

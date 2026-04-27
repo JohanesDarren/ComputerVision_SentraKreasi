@@ -34,13 +34,43 @@ export default function QuickPresence() {
         setPegawaiData(pData);
         setScanResult('success');
 
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const currentHour = new Date().getHours();
+        const currentMinute = new Date().getMinutes();
+        const isLate = currentHour > 7 || (currentHour === 7 && currentMinute > 0);
+        
+        const { data: records } = await supabase
+          .from('presensi')
+          .select('status')
+          .eq('pegawai_id', pData.pegawai_id)
+          .gte('waktu_hadir', today.toISOString());
+          
+        let newStatus = isLate ? 'telat' : 'masuk';
+        let statusMessage = isLate ? 'Hadir (Telat)' : 'Hadir (Masuk)';
+
+        if (records && records.length > 0) {
+           const hasMasuk = records.some(r => ['masuk', 'hadir', 'telat'].includes(r.status));
+           const hasPulang = records.some(r => r.status === 'pulang');
+           
+           if (hasMasuk && hasPulang) {
+              throw new Error('Anda sudah melakukan presensi masuk dan pulang hari ini.');
+           } else if (hasMasuk) {
+              newStatus = 'pulang';
+              statusMessage = 'Selesai (Pulang)';
+           }
+        }
+
         await supabase.from('presensi').insert([
           {
             pegawai_id: pData.pegawai_id,
-            status: 'hadir',
+            status: newStatus,
             gambar_bukti_url: null 
           }
         ]);
+        
+        setPegawaiData({ ...pData, statusMessage });
       } else {
         throw new Error(apiResult.message || 'Verifikasi gagal');
       }
@@ -158,7 +188,7 @@ export default function QuickPresence() {
                      <Smile className="w-7 h-7" />
                   </div>
                   <div>
-                     <h3 className="text-xl font-bold text-slate-900 dark:text-white">Presensi Berhasil</h3>
+                     <h3 className="text-xl font-bold text-slate-900 dark:text-white">Presensi {pegawaiData.statusMessage}</h3>
                      <p className="text-sm font-medium text-slate-600 dark:text-white/70 mt-1">
                        Selamat Datang, <span className="text-emerald-600 dark:text-emerald-400 font-bold">{pegawaiData.nama}</span>.<br/> NIP: {pegawaiData.nip}
                      </p>

@@ -1,4 +1,4 @@
-import { Calendar, Search, Filter, Loader2, Download } from 'lucide-react';
+import { Calendar, Search, Filter, Loader2, Download, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { format } from 'date-fns';
@@ -7,10 +7,76 @@ import { id as localeID } from 'date-fns/locale';
 export default function AdminHistory() {
   const [historyData, setHistoryData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [dateFilter, setDateFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 8;
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus data presensi ini? Pegawai akan bisa presensi ulang.')) return;
+    const { error } = await supabase.from('presensi').delete().eq('id', id);
+    if (!error) {
+      setHistoryData(prev => prev.filter(item => item.id !== id));
+    } else {
+      alert('Gagal menghapus data: ' + error.message);
+    }
+  };
+
+  const filteredData = historyData.filter(item => {
+    const matchName = item.pegawai?.nama?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                      item.pegawai?.nip?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchDate = dateFilter ? format(new Date(item.waktu_hadir), 'yyyy-MM-dd') === dateFilter : true;
+    return matchName && matchDate;
+  });
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, dateFilter]);
+
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE) || 1;
+  const paginatedData = filteredData.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
   useEffect(() => {
     async function fetchHistory() {
       setIsLoading(true);
+      
+      const todayDate = new Date();
+      todayDate.setHours(0, 0, 0, 0);
+      
+      const { data: allData } = await supabase
+        .from('presensi')
+        .select('*')
+        .lt('waktu_hadir', todayDate.toISOString())
+        .order('waktu_hadir', { ascending: false })
+        .limit(1000);
+        
+      if (allData) {
+        const toInsert: any[] = [];
+        const grouped = new Map();
+        for (const row of allData) {
+          const dateStr = format(new Date(row.waktu_hadir), 'yyyy-MM-dd');
+          const key = `${dateStr}_${row.pegawai_id}`;
+          if (!grouped.has(key)) grouped.set(key, []);
+          grouped.get(key).push(row);
+        }
+        for (const [key, records] of grouped.entries()) {
+          const hasMasuk = records.some((r: any) => ['masuk', 'telat', 'hadir'].includes(r.status));
+          const hasPulang = records.some((r: any) => ['pulang', 'tidak absen pulang'].includes(r.status));
+          if (hasMasuk && !hasPulang) {
+            const [dateStr, pegawaiId] = key.split('_');
+            const endOfDay = new Date(dateStr);
+            endOfDay.setHours(23, 59, 59);
+            toInsert.push({
+              pegawai_id: pegawaiId,
+              status: 'tidak absen pulang',
+              waktu_hadir: endOfDay.toISOString(),
+              gambar_bukti_url: null
+            });
+          }
+        }
+        if (toInsert.length > 0) await supabase.from('presensi').insert(toInsert);
+      }
+
       const { data, error } = await supabase
         .from('presensi')
         .select(`
@@ -48,8 +114,18 @@ export default function AdminHistory() {
             <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 dark:text-white/40" />
             <input 
               type="text" 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Cari NIP / Nama..." 
               className="pl-12 pr-4 py-3 rounded-full border border-slate-900/10 dark:border-white/10 bg-white/95 dark:bg-white/5 shadow-xl dark:shadow-none text-sm focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40 w-full md:w-48 lg:w-64 transition-all backdrop-blur-md shadow-inner"
+            />
+          </div>
+          <div className="relative">
+            <input 
+              type="date" 
+              value={dateFilter}
+              onChange={(e) => setDateFilter(e.target.value)}
+              className="px-4 py-3 rounded-full border border-slate-900/10 dark:border-white/10 bg-white/95 dark:bg-white/5 shadow-xl dark:shadow-none text-sm focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 text-slate-900 dark:text-white w-full md:w-40 transition-all backdrop-blur-md shadow-inner"
             />
           </div>
           <button className="p-3 px-6 rounded-full border border-green-500/30 bg-green-500 text-white dark:text-black dark:text-black shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:bg-green-400 flex items-center gap-2 text-sm font-bold transition-all">
@@ -61,8 +137,7 @@ export default function AdminHistory() {
 
       <div className="bg-white/95 dark:bg-white/5 shadow-xl dark:shadow-none border border-slate-900/10 dark:border-white/10 rounded-3xl overflow-hidden flex flex-col transition-colors backdrop-blur-xl relative z-10">
         <div className="p-6 border-b border-slate-900/10 dark:border-white/10 bg-white/95 dark:bg-white/5 shadow-xl dark:shadow-none flex justify-between items-center">
-           <h3 className="text-lg font-bold text-slate-900 dark:text-white">Semua Data Presensi</h3>
-           <button className="text-xs font-semibold text-slate-700 dark:text-white/50 hover:text-slate-900 dark:text-white flex items-center gap-1 transition-colors"><Filter className="w-3 h-3"/> Filter Canggih</button>
+           <h3 className="text-lg font-bold text-slate-900 dark:text-white">Data Presensi Pegawai</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[700px]">
@@ -83,13 +158,13 @@ export default function AdminHistory() {
                     </div>
                   </td>
                 </tr>
-              ) : historyData.length === 0 ? (
+              ) : filteredData.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="py-16 text-center text-slate-700 dark:text-white/50">
-                    <div className="text-sm font-semibold">Belum ada log presensi sama sekali.</div>
+                    <div className="text-sm font-semibold">Tidak ada data presensi yang sesuai.</div>
                   </td>
                 </tr>
-              ) : historyData.map((item) => (
+              ) : paginatedData.map((item) => (
                 <tr key={item.id} className="hover:bg-white/95 dark:bg-white/5 shadow-xl dark:shadow-none transition-colors group">
                   <td className="py-4 px-6 flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-white/90 dark:bg-white/10 shadow-xl dark:shadow-none text-slate-700 dark:text-white/80 border border-slate-900/10 dark:border-white/10 group-hover:bg-green-500 group-hover:text-white dark:text-black transition-colors">
@@ -110,14 +185,21 @@ export default function AdminHistory() {
                     </div>
                   </td>
                   <td className="py-4 px-6">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border
-                      ${item.status === 'hadir' ? 'bg-green-400/20 dark:bg-green-500/10 text-green-400 border-green-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border text-center
+                      ${(item.status === 'masuk' || item.status === 'hadir') ? 'bg-green-400/20 dark:bg-green-500/10 text-green-400 border-green-500/20' : 
+                        item.status === 'pulang' ? 'bg-blue-400/20 dark:bg-blue-500/10 text-blue-500 border-blue-500/20' : 
+                        item.status === 'telat' ? 'bg-orange-400/20 dark:bg-orange-500/10 text-orange-500 border-orange-500/20' : 
+                        'bg-red-500/10 text-red-400 border-red-500/20'}
                     `}>
                       {item.status}
                     </span>
                   </td>
-                  <td className="py-4 px-6 text-right">
-                    <button className="px-4 py-2 rounded-full border border-slate-900/10 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-white/70 hover:bg-white/90 dark:bg-white/10 shadow-xl dark:shadow-none hover:text-slate-900 dark:text-white transition-all">Lihat Log</button>
+                  <td className="py-4 px-6">
+                    <div className="flex justify-end gap-2 items-center">
+                      <button onClick={() => handleDelete(item.id)} title="Hapus Presensi" className="p-2 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -126,10 +208,16 @@ export default function AdminHistory() {
         </div>
         
         <div className="p-5 bg-white/95 dark:bg-white/5 shadow-xl dark:shadow-none border-t border-slate-900/10 dark:border-white/10 flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-700 dark:text-white/40">Total Record: {historyData.length}</span>
+          <span className="text-xs font-medium text-slate-700 dark:text-white/40">Total Record: {filteredData.length} &bull; Halaman {currentPage} dari {totalPages}</span>
           <div className="flex gap-2">
-            <button className="px-4 py-2 rounded-full border border-slate-900/10 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-white/70 hover:bg-white/90 dark:bg-white/10 shadow-xl dark:shadow-none hover:text-slate-900 dark:text-white transition-all">Prev</button>
-            <button className="px-4 py-2 rounded-full border border-slate-900/10 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-white/70 hover:bg-white/90 dark:bg-white/10 shadow-xl dark:shadow-none hover:text-slate-900 dark:text-white transition-all">Next</button>
+            <button 
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 rounded-full border border-slate-900/10 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-white/70 hover:bg-white/90 dark:bg-white/10 shadow-xl dark:shadow-none hover:text-slate-900 dark:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">Prev</button>
+            <button 
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 rounded-full border border-slate-900/10 dark:border-white/10 text-xs font-semibold text-slate-700 dark:text-white/70 hover:bg-white/90 dark:bg-white/10 shadow-xl dark:shadow-none hover:text-slate-900 dark:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
           </div>
         </div>
       </div>

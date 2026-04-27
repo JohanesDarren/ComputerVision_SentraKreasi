@@ -11,9 +11,51 @@ export default function History() {
   useEffect(() => {
     async function fetchHistory() {
       setIsLoading(true);
+      const userId = localStorage.getItem('user_id');
+      if (!userId) {
+        setIsLoading(false);
+        return;
+      }
+      
+      const todayDate = new Date();
+      todayDate.setHours(0, 0, 0, 0);
+      
+      const { data: allData } = await supabase
+        .from('presensi')
+        .select('*')
+        .eq('pegawai_id', userId)
+        .lt('waktu_hadir', todayDate.toISOString())
+        .order('waktu_hadir', { ascending: false });
+        
+      if (allData) {
+        const toInsert: any[] = [];
+        const grouped = new Map();
+        for (const row of allData) {
+          const dateStr = format(new Date(row.waktu_hadir), 'yyyy-MM-dd');
+          if (!grouped.has(dateStr)) grouped.set(dateStr, []);
+          grouped.get(dateStr).push(row);
+        }
+        for (const [dateStr, records] of grouped.entries()) {
+          const hasMasuk = records.some((r: any) => ['masuk', 'telat', 'hadir'].includes(r.status));
+          const hasPulang = records.some((r: any) => ['pulang', 'tidak absen pulang'].includes(r.status));
+          if (hasMasuk && !hasPulang) {
+            const endOfDay = new Date(dateStr);
+            endOfDay.setHours(23, 59, 59);
+            toInsert.push({
+              pegawai_id: userId,
+              status: 'tidak absen pulang',
+              waktu_hadir: endOfDay.toISOString(),
+              gambar_bukti_url: null
+            });
+          }
+        }
+        if (toInsert.length > 0) await supabase.from('presensi').insert(toInsert);
+      }
+
       const { data, error } = await supabase
         .from('presensi')
         .select(`id, waktu_hadir, status, pegawai:pegawai_id (nama, nip)`)
+        .eq('pegawai_id', userId)
         .order('waktu_hadir', { ascending: false })
         .limit(20);
 
@@ -104,8 +146,11 @@ export default function History() {
                     </div>
                   </td>
                   <td className="py-4 px-6">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border
-                      ${item.status === 'hadir' ? 'bg-green-400/20 dark:bg-green-500/10 text-green-400 border-green-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border text-center
+                      ${(item.status === 'masuk' || item.status === 'hadir') ? 'bg-green-400/20 dark:bg-green-500/10 text-green-400 border-green-500/20' : 
+                        item.status === 'pulang' ? 'bg-blue-400/20 dark:bg-blue-500/10 text-blue-500 border-blue-500/20' : 
+                        item.status === 'telat' ? 'bg-orange-400/20 dark:bg-orange-500/10 text-orange-500 border-orange-500/20' : 
+                        'bg-red-500/10 text-red-400 border-red-500/20'}
                     `}>
                       {item.status}
                     </span>

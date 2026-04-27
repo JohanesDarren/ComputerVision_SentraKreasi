@@ -12,7 +12,10 @@ export default function Profile() {
   useEffect(() => {
     async function loadProfile() {
       try {
-        const { data } = await supabase.from('pegawai').select('*').limit(1).single();
+        const userId = localStorage.getItem('user_id');
+        if (!userId) return;
+
+        const { data } = await supabase.from('pegawai').select('*').eq('id', userId).single();
         if (data) setPegawai(data);
       } catch (err) {
         console.error('Gagal memuat profil:', err);

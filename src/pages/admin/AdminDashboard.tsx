@@ -20,7 +20,7 @@ export default function AdminDashboard() {
         const { count: cHadir } = await supabase
           .from('presensi')
           .select('*', { count: 'exact', head: true })
-          .eq('status', 'hadir')
+          .in('status', ['masuk', 'hadir'])
           .gte('waktu_hadir', today.toISOString());
           
         const { count: cAturan } = await supabase.from('aturan_presensi').select('*', { count: 'exact', head: true }).eq('is_active', true);
@@ -140,7 +140,12 @@ export default function AdminDashboard() {
                      <p className="text-xs text-slate-700 dark:text-white/40 mt-0.5">{item.waktu_hadir ? format(new Date(item.waktu_hadir), 'HH:mm | dd MMM yyyy', {locale: localeID}) : '-'}</p>
                    </div>
                  </div>
-                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${item.status === 'hadir' ? 'bg-green-400/20 dark:bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                 <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest text-center
+                   ${(item.status === 'masuk' || item.status === 'hadir') ? 'bg-green-400/20 dark:bg-green-500/10 text-green-400 border border-green-500/20' : 
+                     item.status === 'pulang' ? 'bg-blue-400/20 dark:bg-blue-500/10 text-blue-500 border border-blue-500/20' : 
+                     item.status === 'telat' ? 'bg-orange-400/20 dark:bg-orange-500/10 text-orange-500 border border-orange-500/20' : 
+                     'bg-red-500/10 text-red-400 border border-red-500/20'}
+                 `}>
                    {item.status}
                  </span>
                </div>

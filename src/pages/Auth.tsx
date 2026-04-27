@@ -36,6 +36,7 @@ export default function Auth() {
       } else {
         const { data, error } = await supabase.from('pegawai').select('*').eq('email', loginEmail).single();
         if (data) {
+          localStorage.setItem('user_id', data.id);
           setStatusMsg({ type: 'success', text: 'Login Berhasil!' });
           setTimeout(() => navigate('/user'), 1000);
         } else {
