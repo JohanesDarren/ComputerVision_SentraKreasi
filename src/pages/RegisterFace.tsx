@@ -120,7 +120,7 @@ export default function RegisterFace() {
                 <span className="bg-[#FAF8F5] text-[#2C2825] border-[2px] border-[#2C2825] px-3 py-1 text-[10px] font-bold uppercase tracking-widest">Kamera Registrasi</span>
                 <button 
                   onClick={handleCapture}
-                  className="bg-[#386641] text-white border-[2px] border-[#2C2825] px-4 py-2 text-xs font-bold uppercase hover:bg-[#2C2825] transition-colors flex items-center gap-2"
+                  className="bg-[#386641] text-slate-900 dark:text-white border-[2px] border-[#2C2825] px-4 py-2 text-xs font-bold uppercase hover:bg-[#2C2825] transition-colors flex items-center gap-2"
                 >
                   <Camera className="w-4 h-4" /> Tangkap Sisi {activeAngle.toUpperCase()}
                 </button>
@@ -153,7 +153,7 @@ export default function RegisterFace() {
                          <button onClick={() => {
                             setCapturedImages(prev => ({...prev, [angle]: null}));
                             setActiveAngle(angle);
-                         }} className="p-2 bg-[#E36D4F] text-white border-[2px] border-[#2C2825] hover:bg-[#2C2825]">
+                         }} className="p-2 bg-[#E36D4F] text-slate-900 dark:text-white border-[2px] border-[#2C2825] hover:bg-[#2C2825]">
                             <Trash2 className="w-4 h-4" />
                          </button>
                       )}
@@ -180,7 +180,7 @@ export default function RegisterFace() {
                 className={`mt-6 w-full p-4 font-[Bebas_Neue] text-3xl uppercase flex items-center justify-center gap-3 border-[4px] border-[#2C2825] dark:border-[#EFEBE1] transition-colors ${
                    isProcessing || (!capturedImages.depan || !capturedImages.kiri || !capturedImages.kanan) 
                    ? 'bg-[#EFEBE1] dark:bg-[#1E1C1A] text-[#A89886] cursor-not-allowed'
-                   : 'bg-[#386641] text-white hover:bg-[#2C2825]'
+                   : 'bg-[#386641] text-slate-900 dark:text-white hover:bg-[#2C2825]'
                 }`}
              >
                 {isProcessing ? <><RefreshCw className="w-6 h-6 animate-spin mt-1" /> Sedang Memproses</> : <><Upload className="w-6 h-6 mt-1" /> Daftarkan Wajah</>}

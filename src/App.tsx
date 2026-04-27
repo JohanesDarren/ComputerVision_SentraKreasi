@@ -3,6 +3,7 @@ import AppLayout from './components/layout/AppLayout';
 import AdminLayout from './components/layout/AdminLayout';
 import Auth from './pages/Auth';
 import Landing from './pages/Landing';
+import QuickPresence from './pages/QuickPresence';
 import { ThemeProvider } from './components/ThemeProvider';
 
 // User Pages
@@ -24,6 +25,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Auth />} />
+          <Route path="/presensi-cepat" element={<QuickPresence />} />
           
           <Route path="/user" element={<AppLayout />}>
             <Route index element={<Dashboard />} />

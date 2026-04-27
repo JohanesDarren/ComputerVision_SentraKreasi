@@ -53,18 +53,18 @@ export default function Presensi() {
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 text-white">
-      <div className="mb-4 bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl">
-        <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">Biometrik Cerdas</h1>
-        <p className="text-sm font-medium text-white/50 mt-2">Arahkan wajah ke kamera, AI akan mendeteksi ekspresi Anda.</p>
+    <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 text-slate-900 dark:text-white">
+      <div className="mb-4 bg-white/95 dark:bg-white/5 shadow-xl dark:shadow-none border border-slate-900/10 dark:border-white/10 rounded-3xl p-8 backdrop-blur-xl">
+        <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-white/60">Biometrik Cerdas</h1>
+        <p className="text-sm font-medium text-slate-700 dark:text-white/50 mt-2">Arahkan wajah ke kamera, AI akan mendeteksi ekspresi Anda.</p>
       </div>
 
-      <div className="relative overflow-hidden bg-black border border-white/10 rounded-[2.5rem] aspect-[4/3] md:aspect-[16/9] isolate flex items-center justify-center shadow-2xl">
+      <div className="relative overflow-hidden bg-black border border-slate-900/10 dark:border-white/10 rounded-[2.5rem] aspect-[4/3] md:aspect-[16/9] isolate flex items-center justify-center shadow-2xl">
         <Webcam
           audio={false}
           ref={webcamRef}
           screenshotFormat="image/jpeg"
-          className="object-cover w-full h-full absolute inset-0 -z-10 opacity-80 mix-blend-lighten"
+          className="object-cover w-full h-full absolute inset-0 -z-10"
           videoConstraints={{ facingMode: "user" }}
         />
 
@@ -86,12 +86,12 @@ export default function Presensi() {
               )}
               
               {!isScanning && !scanResult && (
-                 <div className="self-center flex items-center gap-2 bg-black/50 backdrop-blur-md px-4 py-2 text-xs font-semibold text-green-400 rounded-full border border-green-500/30">
+                 <div className="self-center flex items-center gap-2 bg-white/80 dark:bg-black/50 backdrop-blur-md px-4 py-2 text-xs font-semibold text-green-400 rounded-full border border-green-500/30">
                    <ScanLine className="w-4 h-4" /> Area Pindai Wajah
                  </div>
               )}
               {isScanning && (
-                 <div className="self-center flex items-center gap-2 bg-green-500 px-4 py-2 text-xs font-semibold text-black rounded-full shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-pulse">
+                 <div className="self-center flex items-center gap-2 bg-green-500 px-4 py-2 text-xs font-semibold text-slate-900 dark:text-white dark:text-black rounded-full shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-pulse">
                    <RefreshCw className="w-4 h-4 animate-spin" /> Menganalisis...
                  </div>
               )}
@@ -105,9 +105,9 @@ export default function Presensi() {
         </div>
 
         <div className="absolute bottom-6 inset-x-0 z-30 px-6 md:px-8 flex flex-col justify-end gap-4 md:flex-row md:justify-between md:items-end">
-          <div className="bg-black/60 backdrop-blur-xl p-4 rounded-2xl border border-white/10 max-w-[200px]">
-            <p className="text-white/50 text-xs font-medium mb-1">Sensor Biometrik</p>
-            <h2 className="text-white font-bold text-lg flex items-center gap-2">
+          <div className="bg-white/70 dark:bg-black/60 backdrop-blur-xl p-4 rounded-2xl border border-slate-900/10 dark:border-white/10 max-w-[200px]">
+            <p className="text-slate-700 dark:text-white/50 text-xs font-medium mb-1">Sensor Biometrik</p>
+            <h2 className="text-slate-900 dark:text-white font-bold text-lg flex items-center gap-2">
               <span className="w-2.5 h-2.5 bg-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.8)] animate-pulse"></span>Kamera Aktif
             </h2>
           </div>
@@ -117,8 +117,8 @@ export default function Presensi() {
             className={cn(
               "flex items-center justify-center gap-3 px-8 py-4 rounded-full font-bold transition-all",
               isScanning 
-                ? "bg-white/10 text-white/40 cursor-not-allowed border border-white/5" 
-                : "bg-green-500 text-black hover:bg-green-400 shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:shadow-[0_0_30px_rgba(34,197,94,0.5)]"
+                ? "bg-white/90 dark:bg-white/10 shadow-xl dark:shadow-none text-slate-700 dark:text-white/40 cursor-not-allowed border border-white/5" 
+                : "bg-green-500 text-white dark:text-black dark:text-black hover:bg-green-400 shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:shadow-[0_0_30px_rgba(34,197,94,0.5)]"
             )}
           >
             {isScanning ? (
@@ -143,13 +143,13 @@ export default function Presensi() {
               exit={{ opacity: 0, scale: 0.95, y: -10 }}
               className="absolute top-6 left-6 right-6 z-30 flex justify-center"
             >
-              <div className="bg-green-500/10 backdrop-blur-2xl border border-green-500/30 rounded-3xl p-5 md:p-6 flex items-center gap-5 text-left w-full max-w-md shadow-2xl">
-                <div className="w-14 h-14 bg-green-500 text-black rounded-2xl flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(34,197,94,0.4)]">
+              <div className="bg-green-400/20 dark:bg-green-500/10 backdrop-blur-2xl border border-green-500/30 rounded-3xl p-5 md:p-6 flex items-center gap-5 text-left w-full max-w-md shadow-2xl">
+                <div className="w-14 h-14 bg-green-500 text-white dark:text-black dark:text-black rounded-2xl flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(34,197,94,0.4)]">
                    <Smile className="w-7 h-7" />
                 </div>
                 <div>
-                   <h3 className="text-xl font-bold text-white">Presensi Berhasil</h3>
-                   <p className="text-sm font-medium text-white/70 mt-1">
+                   <h3 className="text-xl font-bold text-slate-900 dark:text-white">Presensi Berhasil</h3>
+                   <p className="text-sm font-medium text-slate-700 dark:text-white/70 mt-1">
                      Selamat Datang, <span className="text-green-400 font-semibold">{pegawaiData.nama}</span>.<br/> NIP: {pegawaiData.nip}
                    </p>
                 </div>
@@ -165,11 +165,11 @@ export default function Presensi() {
               className="absolute top-6 left-6 right-6 z-30 flex justify-center"
             >
               <div className="bg-red-500/10 backdrop-blur-2xl border border-red-500/30 rounded-3xl p-5 md:p-6 flex items-center gap-5 text-left w-full max-w-md shadow-2xl">
-                <div className="w-14 h-14 bg-red-500 text-white rounded-2xl flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(239,68,68,0.4)]">
+                <div className="w-14 h-14 bg-red-500 text-white dark:text-black rounded-2xl flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(239,68,68,0.4)]">
                    <Frown className="w-7 h-7" />
                 </div>
                 <div>
-                   <h3 className="text-xl font-bold text-white">Presensi Gagal</h3>
+                   <h3 className="text-xl font-bold text-slate-900 dark:text-white">Presensi Gagal</h3>
                    <p className="text-sm font-medium text-red-400 mt-1">
                      {errorMessage}
                    </p>
@@ -180,13 +180,13 @@ export default function Presensi() {
         </AnimatePresence>
       </div>
       
-      <div className="bg-white/5 border border-white/10 rounded-3xl p-6 flex items-center gap-6 overflow-x-auto backdrop-blur-xl">
-        <div className="px-4 border-r border-white/10 whitespace-nowrap">
-          <p className="text-xs font-medium text-white/50 mb-1">Akurasi AI</p>
+      <div className="bg-white/95 dark:bg-white/5 shadow-xl dark:shadow-none border border-slate-900/10 dark:border-white/10 rounded-3xl p-6 flex items-center gap-6 overflow-x-auto backdrop-blur-xl">
+        <div className="px-4 border-r border-slate-900/10 dark:border-white/10 whitespace-nowrap">
+          <p className="text-xs font-medium text-slate-700 dark:text-white/50 mb-1">Akurasi AI</p>
           <p className="text-2xl font-bold text-green-400">99.8%</p>
         </div>
-        <div className="flex-1 bg-black/30 border border-white/10 rounded-2xl flex items-center px-5 py-4 min-w-[250px]">
-          <p className="text-white/70 text-sm font-medium truncate flex items-center gap-3">
+        <div className="flex-1 bg-white/60 dark:bg-black/30 border border-slate-900/10 dark:border-white/10 rounded-2xl flex items-center px-5 py-4 min-w-[250px]">
+          <p className="text-slate-700 dark:text-white/70 text-sm font-medium truncate flex items-center gap-3">
              <ScanFace className="w-5 h-5 text-green-400" />
             {scanResult === 'success' && pegawaiData 
               ? `"Ananda ${pegawaiData.nama.split(' ')[0]} baru saja melakukan presensi."`

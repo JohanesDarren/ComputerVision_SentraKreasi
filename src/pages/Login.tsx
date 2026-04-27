@@ -10,7 +10,7 @@ export default function Login() {
       {/* Brutalist Grid Background */}
       <div className="fixed inset-0 z-0 pointer-events-none bg-brutalist-grid opacity-60"></div>
       
-      <div className="absolute top-6 right-6 z-20 bg-white/50 dark:bg-black/50 backdrop-blur-sm border border-black/20 dark:border-white/20 p-2">
+      <div className="absolute top-6 right-6 z-20 bg-white/50 dark:bg-white/80 dark:bg-black/50 backdrop-blur-sm border border-black/20 dark:border-white/20 p-2">
         <ThemeToggle />
       </div>
 
@@ -27,7 +27,7 @@ export default function Login() {
             onClick={() => navigate('/user')}
             className="w-full flex items-center bg-[#FAF8F5] dark:bg-[#2A2621] border-[3px] border-[#2C2825] dark:border-[#EFEBE1] hover:bg-[#EFEBE1] dark:hover:bg-[#151413] transition-colors group text-left relative overflow-hidden"
           >
-            <div className="p-6 shrink-0 bg-[#EFEBE1] dark:bg-[#151413] border-r-[3px] border-[#2C2825] dark:border-[#EFEBE1] group-hover:bg-[#386641] group-hover:text-white transition-colors">
+            <div className="p-6 shrink-0 bg-[#EFEBE1] dark:bg-[#151413] border-r-[3px] border-[#2C2825] dark:border-[#EFEBE1] group-hover:bg-[#386641] group-hover:text-slate-900 dark:text-white transition-colors">
               <User className="w-8 h-8" />
             </div>
             <div className="p-4 flex-1">
@@ -43,7 +43,7 @@ export default function Login() {
             onClick={() => navigate('/admin')}
             className="w-full flex items-center bg-[#FAF8F5] dark:bg-[#2A2621] border-[3px] border-[#2C2825] dark:border-[#EFEBE1] hover:bg-[#EFEBE1] dark:hover:bg-[#151413] transition-colors group text-left relative overflow-hidden"
           >
-            <div className="p-6 shrink-0 bg-[#EFEBE1] dark:bg-[#151413] border-r-[3px] border-[#2C2825] dark:border-[#EFEBE1] group-hover:bg-[#2C2825] dark:group-hover:bg-[#EFEBE1] group-hover:text-white dark:group-hover:text-[#151413] transition-colors">
+            <div className="p-6 shrink-0 bg-[#EFEBE1] dark:bg-[#151413] border-r-[3px] border-[#2C2825] dark:border-[#EFEBE1] group-hover:bg-[#2C2825] dark:group-hover:bg-[#EFEBE1] group-hover:text-slate-900 dark:text-white dark:group-hover:text-[#151413] transition-colors">
               <ShieldCheck className="w-8 h-8" />
             </div>
             <div className="p-4 flex-1">
