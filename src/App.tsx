@@ -19,32 +19,32 @@ import AdminAturan from './pages/admin/AdminAturan';
 import AdminHistory from './pages/admin/AdminHistory';
 
 export default function App() {
-  return (
-    <ThemeProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/login" element={<Auth />} />
-          <Route path="/presensi-cepat" element={<QuickPresence />} />
-          
-          <Route path="/user" element={<AppLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="presensi" element={<Presensi />} />
-            <Route path="history" element={<History />} />
-            <Route path="profile" element={<Profile />} />
-          </Route>
+ return (
+  <ThemeProvider>
+   <BrowserRouter>
+    <Routes>
+     <Route path="/" element={<Landing />} />
+     <Route path="/login" element={<Auth />} />
+     <Route path="/presensi-cepat" element={<QuickPresence />} />
+     
+     <Route path="/user" element={<AppLayout />}>
+      <Route index element={<Dashboard />} />
+      <Route path="presensi" element={<Presensi />} />
+      <Route path="history" element={<History />} />
+      <Route path="profile" element={<Profile />} />
+     </Route>
 
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboard />} />
-            <Route path="register" element={<RegisterFace />} />
-            <Route path="pegawai" element={<AdminPegawai />} />
-            <Route path="aturan" element={<AdminAturan />} />
-            <Route path="history" element={<AdminHistory />} />
-          </Route>
+     <Route path="/admin" element={<AdminLayout />}>
+      <Route index element={<AdminDashboard />} />
+      <Route path="register" element={<RegisterFace />} />
+      <Route path="pegawai" element={<AdminPegawai />} />
+      <Route path="aturan" element={<AdminAturan />} />
+      <Route path="history" element={<AdminHistory />} />
+     </Route>
 
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </ThemeProvider>
-  );
+     <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+   </BrowserRouter>
+  </ThemeProvider>
+ );
 }
