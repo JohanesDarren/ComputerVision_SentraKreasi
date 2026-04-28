@@ -1,4 +1,6 @@
-import { Clock, Edit2, Loader2, Save, X, Trash2, Calendar, Plus } from 'lucide-react';
+import os
+
+content = """import { Clock, Edit2, Loader2, Save, X, Trash2, Calendar, Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { id as localeID } from 'date-fns/locale';
@@ -22,12 +24,7 @@ export default function AdminAturan() {
   setIsLoading(true);
   const data = localStorage.getItem('app_aturan_standar');
   if (data) {
-   let parsed = JSON.parse(data);
-   if (parsed.hari_libur && parsed.hari_libur.length > 0 && typeof parsed.hari_libur[0] === 'string') {
-     parsed.hari_libur = parsed.hari_libur.map((d: string) => ({ tanggal: d, nama: 'Libur (Migrasi)' }));
-     localStorage.setItem('app_aturan_standar', JSON.stringify(parsed));
-   }
-   setAturan(parsed);
+   setAturan(JSON.parse(data));
   } else {
    const defaultAturan = {
     jam_masuk: '07:00',
@@ -156,21 +153,19 @@ export default function AdminAturan() {
          Belum ada tanggal libur yang ditetapkan.
         </div>
        ) : (
-        aturan.hari_libur.map((item: any, i: number) => {
-         const validDate = item.tanggal ? new Date(item.tanggal) : new Date();
-         return (
-         <div key={item.tanggal || i} className="flex justify-between items-center p-4 bg-slate-200 dark:bg-slate-700/50 rounded-xl border border-slate-300 dark:border-slate-600">
+        aturan.hari_libur.map((item: any) => (
+         <div key={item.tanggal} className="flex justify-between items-center p-4 bg-slate-200 dark:bg-slate-700/50 rounded-xl border border-slate-300 dark:border-slate-600">
           <div>
            <h4 className="text-sm font-bold text-slate-900 dark:text-white">{item.nama}</h4>
            <span className="text-xs font-semibold text-slate-700 dark:text-white/50 block mt-0.5">
-            {!isNaN(validDate.getTime()) ? format(validDate, 'dd MMMM yyyy', {locale: localeID}) : 'Tanggal tidak valid'}
+            {format(new Date(item.tanggal), 'dd MMMM yyyy', {locale: localeID})}
            </span>
           </div>
           <button type="button" onClick={() => removeHariLibur(item.tanggal)} className="text-red-400 hover:text-red-500 p-2 rounded-lg hover:bg-red-500/10">
            <Trash2 className="w-4 h-4" />
           </button>
          </div>
-        )})
+        ))
        )}
       </div>
      </div>
@@ -261,3 +256,26 @@ export default function AdminAturan() {
   </div>
  );
 }
+"""
+
+with open('src/pages/admin/AdminAturan.tsx', 'w', encoding='utf-8') as f:
+    f.write(content)
+
+# Update Presensi.tsx and QuickPresence.tsx
+for filepath in ['src/pages/Presensi.tsx', 'src/pages/QuickPresence.tsx']:
+    with open(filepath, 'r', encoding='utf-8') as f:
+        file_content = f.read()
+        
+    old_logic = """    if (activeAturan && activeAturan.hari_libur && activeAturan.hari_libur.includes(localISOTime)) {
+      throw new Error('Hari ini adalah hari Libur Nasional, sistem presensi ditutup.');
+    }"""
+    new_logic = """    if (activeAturan && activeAturan.hari_libur) {
+      const liburHariIni = activeAturan.hari_libur.find((d: any) => d.tanggal === localISOTime);
+      if (liburHariIni) {
+        throw new Error(`Hari ini adalah ${liburHariIni.nama}, sistem presensi ditutup.`);
+      }
+    }"""
+    
+    file_content = file_content.replace(old_logic, new_logic)
+    with open(filepath, 'w', encoding='utf-8') as f:
+        f.write(file_content)

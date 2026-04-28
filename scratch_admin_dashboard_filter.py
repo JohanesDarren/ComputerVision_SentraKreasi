@@ -1,4 +1,6 @@
-import { Users, ScanFace, Settings, TrendingUp, UserCheck, AlertCircle, Loader2 } from 'lucide-react';
+import os
+
+content = """import { Users, ScanFace, Settings, TrendingUp, UserCheck, AlertCircle, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { format, startOfMonth, endOfMonth, getDaysInMonth, setMonth, setYear } from 'date-fns';
@@ -296,3 +298,7 @@ export default function AdminDashboard() {
   </div>
  );
 }
+"""
+
+with open('src/pages/admin/AdminDashboard.tsx', 'w', encoding='utf-8') as f:
+    f.write(content)

@@ -1,4 +1,6 @@
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
+import os
+
+content = """import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from 'recharts';
 import { Clock, MapPin, CheckCircle, TrendingUp, Sparkles, Smile, BatteryMedium, AlertCircle, Loader2 } from 'lucide-react';
 import { useTheme } from '../components/ThemeProvider';
 import { useState, useEffect } from 'react';
@@ -258,3 +260,7 @@ export default function Dashboard() {
   </div>
  );
 }
+"""
+
+with open('src/pages/Dashboard.tsx', 'w', encoding='utf-8') as f:
+    f.write(content)

@@ -65,7 +65,15 @@ export default function AdminHistory() {
      if (hasMasuk && !hasPulang) {
       const [dateStr, pegawaiId] = key.split('_');
       const endOfDay = new Date(dateStr);
-      endOfDay.setHours(23, 59, 59);
+      
+      const aturanData = localStorage.getItem('app_aturan_standar');
+      let jamBatas = '23:59';
+      if (aturanData) {
+        const parsed = JSON.parse(aturanData);
+        if (parsed.jam_batas_pulang) jamBatas = parsed.jam_batas_pulang;
+      }
+      const [bH, bM] = jamBatas.split(':').map(Number);
+      endOfDay.setHours(bH, bM, 59);
       toInsert.push({
        pegawai_id: pegawaiId,
        status: 'tidak absen pulang',
@@ -83,6 +91,7 @@ export default function AdminHistory() {
      id,
      waktu_hadir,
      status,
+     gambar_bukti_url,
      pegawai:pegawai_id (
       nama,
       nip

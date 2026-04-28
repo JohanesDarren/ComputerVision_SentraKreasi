@@ -37,9 +37,41 @@ export default function QuickPresence() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const currentHour = new Date().getHours();
-    const currentMinute = new Date().getMinutes();
-    const isLate = currentHour > 7 || (currentHour === 7 && currentMinute > 0);
+    const aturanData = localStorage.getItem('app_aturan_standar');
+    let activeAturan = null;
+    if (aturanData) {
+      activeAturan = JSON.parse(aturanData);
+    }
+    
+    // Format YYYY-MM-DD local logic safely
+    const todayObj = new Date();
+    const tzOffset = todayObj.getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(todayObj.getTime() - tzOffset)).toISOString().split('T')[0];
+    
+    if (activeAturan && activeAturan.hari_libur) {
+      const liburHariIni = activeAturan.hari_libur.find((d: any) => d.tanggal === localISOTime);
+      if (liburHariIni) {
+        throw new Error(`Hari ini adalah ${liburHariIni.nama}, sistem presensi ditutup.`);
+      }
+    }
+
+    let isLate = false;
+    if (activeAturan && activeAturan.jam_masuk) {
+      const [masukH, masukM] = activeAturan.jam_masuk.split(':').map(Number);
+      const toleransi = activeAturan.toleransi_menit || 0;
+      
+      const batasMasukDate = new Date();
+      batasMasukDate.setHours(masukH, masukM, 0, 0);
+      batasMasukDate.setMinutes(batasMasukDate.getMinutes() + toleransi);
+      
+      if (new Date() > batasMasukDate) {
+        isLate = true;
+      }
+    } else {
+      const currentHour = new Date().getHours();
+      const currentMinute = new Date().getMinutes();
+      isLate = currentHour > 7 || (currentHour === 7 && currentMinute > 0);
+    }
     
     const { data: records } = await supabase
      .from('presensi')
@@ -57,6 +89,15 @@ export default function QuickPresence() {
       if (hasMasuk && hasPulang) {
        throw new Error('Anda sudah melakukan presensi masuk dan pulang hari ini.');
       } else if (hasMasuk) {
+       if (activeAturan && activeAturan.jam_keluar) {
+         const [keluarH, keluarM] = activeAturan.jam_keluar.split(':').map(Number);
+         const batasKeluarDate = new Date();
+         batasKeluarDate.setHours(keluarH, keluarM, 0, 0);
+         
+         if (new Date() < batasKeluarDate) {
+           throw new Error('Status: Pulang Terlalu Cepat. Presensi ditolak karena belum waktunya pulang.');
+         }
+       }
        newStatus = 'pulang';
        statusMessage = 'Selesai (Pulang)';
       }

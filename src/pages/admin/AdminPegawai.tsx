@@ -82,8 +82,12 @@ export default function AdminPegawai() {
        ) : pegawai.map((item) => (
         <tr key={item.id} className="hover:bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none transition-colors group">
          <td className="py-4 px-6 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-green-400/20 dark:bg-green-500/10 text-green-400 border border-green-500/20 group-hover:bg-green-500 group-hover:text-white dark:text-black transition-colors">
-            {item.nama?.substring(0, 2).toUpperCase() || '??'}
+          <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-green-400/20 dark:bg-green-500/10 text-green-400 border border-green-500/20 group-hover:bg-green-500 group-hover:text-white dark:text-black transition-colors overflow-hidden shrink-0">
+            {localStorage.getItem(`profile_photo_${item.id}`) ? (
+               <img src={localStorage.getItem(`profile_photo_${item.id}`)!} alt="Profil" className="w-full h-full object-cover" />
+            ) : (
+               item.nama?.substring(0, 2).toUpperCase() || '??'
+            )}
           </div>
           <div>
             <p className="text-sm font-semibold text-slate-900 dark:text-white">{item.nama}</p>
@@ -108,9 +112,6 @@ export default function AdminPegawai() {
          </td>
          <td className="py-4 px-6">
           <div className="flex items-center justify-end gap-2">
-            <button className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none hover:bg-slate-200 dark:bg-slate-700 shadow-sm dark:shadow-none text-slate-700 dark:text-white/70 hover:text-slate-900 dark:text-white transition-all border border-white/5">
-             <Edit className="w-4 h-4" />
-            </button>
             <button onClick={() => handleDelete(item.id)} className="p-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all">
              <Trash2 className="w-4 h-4" />
             </button>
