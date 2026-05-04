@@ -5,10 +5,9 @@ router = APIRouter()
 
 # Ambang batas kemiripan (Cosine Similarity Threshold).
 # Rentang nilai adalah 0 sampai 1.
-# - > 0.6 atau 0.7 sering dianggap "wajah yang sama" untuk Facenet512.
-# - Sesuaikan nilai ini saat testing di lingkungan PAUD sesungguhnya 
-#   (tergantung pencahayaan dan kualitas kamera).
-THRESHOLD_SIMILARITY = 0.65 
+# - 0.55 - 0.65 adalah rentang yang umum untuk Facenet512.
+# - Semakin kecil nilainya, semakin longgar (mudah mengenali tapi risiko salah orang naik).
+THRESHOLD_SIMILARITY = 0.55 
 
 @router.post("/register-face")
 async def register_face(
@@ -107,6 +106,28 @@ async def verify_presence(
         
     # Jika tidak ada satupun yang melewati match_threshold
     if not matches or len(matches) == 0:
+        # Debug: Cari tahu skor tertinggi yang ada di DB untuk membantu troubleshooting
+        try:
+            print(f"[Debug] Wajah tidak cocok dengan threshold {THRESHOLD_SIMILARITY}. Mencoba mencari kecocokan terdekat...")
+            all_pegawai = supabase.table('pegawai').select('id, nama, embedding').not_.is_('embedding', 'null').execute()
+            if all_pegawai.data:
+                import numpy as np
+                def cosine_similarity(v1, v2):
+                    return np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
+                
+                similarities = []
+                for p in all_pegawai.data:
+                    sim = cosine_similarity(embedding, p['embedding'])
+                    similarities.append((p['nama'], sim))
+                
+                # Urutkan berdasarkan similarity tertinggi
+                similarities.sort(key=lambda x: x[1], reverse=True)
+                print(f"[Debug] Top 3 kecocokan terdekat:")
+                for name, score in similarities[:3]:
+                    print(f"  - {name}: {score:.4f}")
+        except Exception as e:
+            print(f"[Debug] Gagal melakukan debugging manual: {e}")
+            
         raise HTTPException(status_code=401, detail="Wajah tidak dikenali. Pastikan Anda sudah terdaftar atau coba posisikan wajah lebih jelas.")
         
     pegawai_cocok = matches[0]

@@ -52,6 +52,7 @@ def process_face_image(image_bytes: bytes) -> list:
 
     # 2. Coba detector opencv (ringan & cepat, ~100ms)
     try:
+        logger.info("Mencoba deteksi wajah dengan opencv...")
         embedding_objs = DeepFace.represent(
             img_path=img,
             model_name=EMBEDDING_MODEL,
@@ -59,8 +60,10 @@ def process_face_image(image_bytes: bytes) -> list:
             enforce_detection=True,
             align=True
         )
-    except ValueError:
-        pass
+    except ValueError as e:
+        logger.warning(f"opencv tidak menemukan wajah: {e}")
+    except Exception as e:
+        logger.error(f"Error pada detector opencv: {e}")
 
     # 3. Fallback ke mtcnn jika opencv gagal (~300ms, lebih akurat untuk sudut wajah)
     if not embedding_objs:
@@ -73,8 +76,10 @@ def process_face_image(image_bytes: bytes) -> list:
                 enforce_detection=True,
                 align=True
             )
-        except ValueError:
-            pass
+        except ValueError as e:
+            logger.warning(f"mtcnn tidak menemukan wajah: {e}")
+        except Exception as e:
+            logger.error(f"Error pada detector mtcnn: {e}")
 
     if not embedding_objs:
         raise HTTPException(

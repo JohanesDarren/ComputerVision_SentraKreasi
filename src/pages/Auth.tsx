@@ -34,7 +34,14 @@ export default function Auth() {
     setStatusMsg({ type: 'success', text: 'Login Admin Berhasil!' });
     setTimeout(() => navigate('/admin'), 1000);
    } else {
-    const { data, error } = await supabase.from('pegawai').select('*').eq('email', loginEmail).single();
+    // Mengecek email DAN password di tabel pegawai
+    const { data, error } = await supabase
+     .from('pegawai')
+     .select('*')
+     .eq('email', loginEmail)
+     .eq('password', loginPassword)
+     .single();
+
     if (data) {
      localStorage.setItem('user_id', data.id);
      setStatusMsg({ type: 'success', text: 'Login Berhasil!' });
@@ -76,7 +83,12 @@ export default function Auth() {
   try {
    const { data: insertedData, error: insertErr } = await supabase
     .from('pegawai')
-    .insert([{ nama: formData.nama, nip: formData.nip, email: formData.email }])
+    .insert([{ 
+      nama: formData.nama, 
+      nip: formData.nip, 
+      email: formData.email,
+      password: formData.password 
+    }])
     .select()
     .single();
 
