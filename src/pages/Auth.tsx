@@ -23,6 +23,7 @@ export default function Auth() {
  
  const [isProcessing, setIsProcessing] = useState(false);
  const [statusMsg, setStatusMsg] = useState<{type: 'success'|'error'|'info', text: string} | null>(null);
+ const [errors, setErrors] = useState({ nama: '', nip: '', email: '', password: '' });
 
  const handleLogin = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -68,10 +69,23 @@ export default function Auth() {
 
  const handleRegister = async (e: React.FormEvent) => {
   e.preventDefault();
-  if (!formData.nama || !formData.nip || !formData.email || !formData.password) {
-   setStatusMsg({ type: 'error', text: 'Semua field harus diisi!' });
-   return;
-  }
+  
+  let newErrors = { nama: '', nip: '', email: '', password: '' };
+  let isValid = true;
+  
+  if (!formData.nama) { newErrors.nama = 'Nama wajib diisi'; isValid = false; }
+  if (!formData.nip) { newErrors.nip = 'NIP wajib diisi'; isValid = false; }
+  else if (!/^\d+$/.test(formData.nip)) { newErrors.nip = 'NIP harus berupa angka'; isValid = false; }
+  
+  if (!formData.email) { newErrors.email = 'Email wajib diisi'; isValid = false; }
+  else if (!/^\S+@\S+\.\S+$/.test(formData.email)) { newErrors.email = 'Format email tidak valid'; isValid = false; }
+  
+  if (!formData.password) { newErrors.password = 'Password wajib diisi'; isValid = false; }
+  else if (formData.password.length < 6) { newErrors.password = 'Password minimal 6 karakter'; isValid = false; }
+  
+  setErrors(newErrors);
+  
+  if (!isValid) return;
   if (!capturedImages.depan || !capturedImages.kiri || !capturedImages.kanan) {
    setStatusMsg({ type: 'error', text: 'Anda harus menangkap 3 sisi wajah.' });
    return;
@@ -138,8 +152,11 @@ export default function Auth() {
     </div>
 
     {mode === 'login' ? (
-     <form onSubmit={handleLogin} className="w-full max-w-md bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 p-8 md:p-10 rounded-3xl shadow-2xl">
-       <div className="text-center mb-8">
+     <form onSubmit={handleLogin} className="w-full max-w-md bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 p-8 md:p-10 rounded-3xl shadow-2xl relative">
+       <button type="button" onClick={() => navigate('/')} className="absolute top-6 left-6 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-1 text-xs font-semibold">
+        <ArrowRight className="w-3 h-3 rotate-180" /> Kembali
+       </button>
+       <div className="text-center mb-8 mt-4">
         <h2 className="text-3xl font-bold tracking-tight mb-2">Selamat Datang</h2>
         <p className="text-sm text-slate-700 dark:text-white/50">Masukkan kredensial untuk mengakses sistem.</p>
        </div>
@@ -181,24 +198,28 @@ export default function Auth() {
         <h3 className="text-xl font-bold mb-6">Data Diri Pribadi</h3>
         <div>
          <label className="text-xs font-medium text-slate-700 dark:text-white/70 block mb-2">Nama Lengkap</label>
-         <input type="text" value={formData.nama} onChange={e => setFormData({ ...formData, nama: e.target.value })} className="w-full bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-2xl p-4 text-sm focus:outline-none focus:border-green-500/50 transition-all" placeholder="Masukkan nama" />
+         <input type="text" value={formData.nama} onChange={e => {setFormData({ ...formData, nama: e.target.value }); setErrors({...errors, nama: ''});}} className={`w-full bg-slate-100 dark:bg-slate-800 shadow-sm border ${errors.nama ? 'border-red-500/50' : 'border-slate-300 dark:border-slate-700'} rounded-2xl p-4 text-sm focus:outline-none focus:border-green-500/50 transition-all`} placeholder="Masukkan nama" />
+         {errors.nama && <p className="text-xs text-red-500 mt-1">{errors.nama}</p>}
         </div>
         <div>
          <label className="text-xs font-medium text-slate-700 dark:text-white/70 block mb-2">NIP / ID Unik</label>
-         <input type="text" value={formData.nip} onChange={e => setFormData({ ...formData, nip: e.target.value })} className="w-full bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-2xl p-4 text-sm focus:outline-none focus:border-green-500/50 transition-all" placeholder="Nomor Induk" />
+         <input type="text" value={formData.nip} onChange={e => {setFormData({ ...formData, nip: e.target.value }); setErrors({...errors, nip: ''});}} className={`w-full bg-slate-100 dark:bg-slate-800 shadow-sm border ${errors.nip ? 'border-red-500/50' : 'border-slate-300 dark:border-slate-700'} rounded-2xl p-4 text-sm focus:outline-none focus:border-green-500/50 transition-all`} placeholder="Nomor Induk" />
+         {errors.nip && <p className="text-xs text-red-500 mt-1">{errors.nip}</p>}
         </div>
         <div>
          <label className="text-xs font-medium text-slate-700 dark:text-white/70 block mb-2">Email</label>
-         <input type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} className="w-full bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-2xl p-4 text-sm focus:outline-none focus:border-green-500/50 transition-all" placeholder="email@contoh.com" />
+         <input type="email" value={formData.email} onChange={e => {setFormData({ ...formData, email: e.target.value }); setErrors({...errors, email: ''});}} className={`w-full bg-slate-100 dark:bg-slate-800 shadow-sm border ${errors.email ? 'border-red-500/50' : 'border-slate-300 dark:border-slate-700'} rounded-2xl p-4 text-sm focus:outline-none focus:border-green-500/50 transition-all`} placeholder="email@contoh.com" />
+         {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
         </div>
         <div>
          <label className="text-xs font-medium text-slate-700 dark:text-white/70 block mb-2">Kata Sandi</label>
-         <input type="password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} className="w-full bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-2xl p-4 text-sm focus:outline-none focus:border-green-500/50 transition-all" placeholder="••••••••" />
+         <input type="password" value={formData.password} onChange={e => {setFormData({ ...formData, password: e.target.value }); setErrors({...errors, password: ''});}} className={`w-full bg-slate-100 dark:bg-slate-800 shadow-sm border ${errors.password ? 'border-red-500/50' : 'border-slate-300 dark:border-slate-700'} rounded-2xl p-4 text-sm focus:outline-none focus:border-green-500/50 transition-all`} placeholder="••••••••" />
+         {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password}</p>}
         </div>
        </div>
 
        <div className="bg-black border border-slate-300 dark:border-slate-700 rounded-3xl p-2 relative aspect-[4/3] overflow-hidden">
-         <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg" className="object-cover w-full h-full rounded-2xl" videoConstraints={{ facingMode: "user" }} />
+         <Webcam disablePictureInPicture audio={false} ref={webcamRef} screenshotFormat="image/jpeg" className="object-cover w-full h-full rounded-2xl" videoConstraints={{ facingMode: "user" }} />
          <div className="absolute bottom-6 left-6 right-6 flex justify-between items-center z-10">
           <span className="bg-white/80 dark:bg-black/50 text-slate-700 dark:text-white/80 border border-slate-300 dark:border-slate-700 px-3 py-1 rounded-full text-xs font-medium">Kamera Aktif</span>
           <button type="button" onClick={handleCapture} className="bg-green-500 text-white dark:text-black dark:text-black px-4 py-2 rounded-full text-sm font-bold shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:bg-green-400 transition-all flex items-center gap-2">

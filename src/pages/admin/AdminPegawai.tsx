@@ -1,10 +1,13 @@
-import { Users, Search, Plus, Trash2, Edit, AlertCircle, Loader2 } from 'lucide-react';
+import { Users, Search, Plus, Trash2, Edit, AlertCircle, Loader2, X, CheckCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 
 export default function AdminPegawai() {
  const [pegawai, setPegawai] = useState<any[]>([]);
  const [isLoading, setIsLoading] = useState(true);
+ const [showAddModal, setShowAddModal] = useState(false);
+ const [newPegawai, setNewPegawai] = useState({ nama: '', nip: '', email: '', password: '' });
+ const [isSubmitting, setIsSubmitting] = useState(false);
 
  useEffect(() => {
   fetchPegawai();
@@ -21,6 +24,22 @@ export default function AdminPegawai() {
   if (!confirm('Yakin ingin menghapus pegawai ini? Data presensi terkait mungkin akan terpengaruh.')) return;
   await supabase.from('pegawai').delete().eq('id', id);
   fetchPegawai();
+ };
+
+ const handleAdd = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsSubmitting(true);
+  try {
+   const { error } = await supabase.from('pegawai').insert([newPegawai]);
+   if (error) throw error;
+   setShowAddModal(false);
+   setNewPegawai({ nama: '', nip: '', email: '', password: '' });
+   fetchPegawai();
+  } catch (err) {
+   alert('Gagal menambahkan pegawai. NIP atau Email mungkin sudah digunakan.');
+  } finally {
+   setIsSubmitting(false);
+  }
  };
 
  return (
@@ -43,7 +62,7 @@ export default function AdminPegawai() {
        className="pl-12 pr-4 py-3 rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none text-sm focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40 w-full md:w-48 lg:w-64 transition-all shadow-inner"
       />
      </div>
-     <button className="p-3 px-6 rounded-full border border-green-500/30 bg-green-500 text-white dark:text-black dark:text-black shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:bg-green-400 flex items-center gap-2 text-sm font-bold transition-all">
+     <button onClick={() => setShowAddModal(true)} className="p-3 px-6 rounded-full border border-green-500/30 bg-green-500 text-white dark:text-black dark:text-black shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:bg-green-400 flex items-center gap-2 text-sm font-bold transition-all">
       <Plus className="w-4 h-4" />
       <span className="hidden sm:inline">Tambah Pegawai</span>
      </button>
@@ -80,7 +99,7 @@ export default function AdminPegawai() {
          </td>
         </tr>
        ) : pegawai.map((item) => (
-        <tr key={item.id} className="hover:bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none transition-colors group">
+        <tr key={item.id} className="hover:bg-slate-100 dark:hover:bg-slate-700/50 shadow-sm dark:shadow-none transition-colors group">
          <td className="py-4 px-6 flex items-center gap-4">
           <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-green-400/20 dark:bg-green-500/10 text-green-400 border border-green-500/20 group-hover:bg-green-500 group-hover:text-white dark:text-black transition-colors overflow-hidden shrink-0">
             {localStorage.getItem(`profile_photo_${item.id}`) ? (
@@ -123,6 +142,41 @@ export default function AdminPegawai() {
      </table>
     </div>
    </div>
+
+   {showAddModal && (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+     <div className="bg-slate-100 dark:bg-slate-800 shadow-xl border border-slate-300 dark:border-slate-700 w-full max-w-md rounded-3xl overflow-hidden animate-in zoom-in-95 duration-200">
+      <div className="p-6 border-b border-slate-300 dark:border-slate-700 flex justify-between items-center">
+       <h3 className="text-xl font-bold">Tambah Pegawai</h3>
+       <button onClick={() => setShowAddModal(false)} className="text-slate-700 dark:text-white/50 hover:text-slate-900 dark:text-white">
+        <X className="w-6 h-6" />
+       </button>
+      </div>
+      <form onSubmit={handleAdd} className="p-6 space-y-4">
+       <div>
+        <label className="text-xs font-medium text-slate-700 dark:text-white/70 block mb-1">Nama Lengkap</label>
+        <input required type="text" value={newPegawai.nama} onChange={e => setNewPegawai({...newPegawai, nama: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:border-green-500 focus:outline-none" />
+       </div>
+       <div>
+        <label className="text-xs font-medium text-slate-700 dark:text-white/70 block mb-1">NIP</label>
+        <input required type="text" value={newPegawai.nip} onChange={e => setNewPegawai({...newPegawai, nip: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:border-green-500 focus:outline-none" />
+       </div>
+       <div>
+        <label className="text-xs font-medium text-slate-700 dark:text-white/70 block mb-1">Email</label>
+        <input required type="email" value={newPegawai.email} onChange={e => setNewPegawai({...newPegawai, email: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:border-green-500 focus:outline-none" />
+       </div>
+       <div>
+        <label className="text-xs font-medium text-slate-700 dark:text-white/70 block mb-1">Password</label>
+        <input required type="password" value={newPegawai.password} onChange={e => setNewPegawai({...newPegawai, password: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:border-green-500 focus:outline-none" />
+       </div>
+       <button disabled={isSubmitting} type="submit" className="w-full mt-4 py-3 bg-green-500 text-white font-bold rounded-xl hover:bg-green-400 transition-colors">
+        {isSubmitting ? 'Menyimpan...' : 'Simpan Pegawai'}
+       </button>
+      </form>
+     </div>
+    </div>
+   )}
+
   </div>
  );
 }

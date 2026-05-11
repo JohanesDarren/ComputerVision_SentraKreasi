@@ -14,7 +14,7 @@ export default function AdminLayout() {
  const navigate = useNavigate();
 
  return (
-  <div className="relative flex h-screen w-full overflow-hidden bg-gradient-to-br from-[#e8f5e9] via-[#f1f8f5] to-[#ffffff] dark:from-[#021208] dark:via-[#0a2e15] dark:to-[#000000] text-slate-900 dark:text-white font-sans selection:bg-green-500 selection:text-slate-900 dark:text-white transition-colors duration-500">
+  <div className="relative flex h-screen w-full overflow-hidden bg-gradient-to-br from-[#e8f5e9] via-[#f1f8f5] to-[#e8f5e9] dark:from-[#021208] dark:via-[#0a2e15] dark:to-[#000000] text-slate-900 dark:text-white font-sans selection:bg-green-500 selection:text-slate-900 dark:text-white transition-colors duration-500">
    
    {/* Background Glows */}
    <div className="absolute inset-0 z-0 pointer-events-none">
@@ -24,12 +24,12 @@ export default function AdminLayout() {
 
    <div className="relative z-10 flex h-full w-full p-4 md:p-6 gap-6">
     {/* Sidebar Desktop */}
-    <aside className="hidden md:flex flex-col w-[80px] py-8 items-center rounded-[2rem] bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 h-full justify-between shrink-0 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
-     <div className="flex flex-col items-center gap-8">
-      <div className="w-12 h-12 flex items-center justify-center p-2 rounded-xl bg-slate-200 dark:bg-slate-700 shadow-sm dark:shadow-none border border-slate-300 dark:border-slate-700 shadow-inner">
-       <img src="/logo.png" alt="SentraKreasi" className="w-full h-full object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] dark:drop-shadow-sm brightness-110 dark:brightness-200" />
+    <aside className="hidden md:flex flex-col w-[240px] py-8 px-4 items-center rounded-[2rem] bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 h-full justify-between shrink-0 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+     <div className="flex flex-col items-center gap-8 w-full">
+      <div className="w-16 h-16 flex items-center justify-center p-2 rounded-xl bg-slate-200 dark:bg-slate-700 shadow-sm dark:shadow-none border border-slate-300 dark:border-slate-700 shadow-inner">
+       <img src="/logo.png" alt="SentraKreasi" className="w-full h-full object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] dark:drop-shadow-sm brightness-110 dark:brightness-200 invert dark:invert-0" />
       </div>
-      <nav className="flex flex-col gap-4 mt-6">
+      <nav className="flex flex-col gap-4 mt-6 w-full">
        {NAV_ITEMS.map((item) => (
         <NavLink
          key={item.path}
@@ -37,29 +37,35 @@ export default function AdminLayout() {
          end={item.path === '/admin'}
          className={({ isActive }) =>
           cn(
-           "w-12 h-12 flex items-center justify-center rounded-2xl transition-all relative group",
+           "w-full h-12 flex items-center px-4 rounded-2xl transition-all relative group",
            isActive 
-            ? "bg-green-500 text-white dark:text-black dark:text-black shadow-[0_0_20px_rgba(34,197,94,0.4)]" 
+            ? "bg-green-500 text-white dark:text-black shadow-[0_0_20px_rgba(34,197,94,0.4)]" 
             : "text-slate-700 dark:text-white/60 hover:text-slate-900 dark:text-white hover:bg-white/10"
           )
          }
          title={item.label}
         >
-         <item.icon className="w-5 h-5" />
+         <item.icon className="w-5 h-5 shrink-0" />
+         <span className="ml-4 font-semibold text-sm">{item.label}</span>
         </NavLink>
        ))}
       </nav>
      </div>
 
-     <div className="flex flex-col gap-6 items-center">
+     <div className="flex flex-col gap-6 items-center w-full">
       <ThemeToggle />
       <div className="w-8 h-[1px] bg-white/20 my-1"></div>
       <button 
-       onClick={() => navigate('/login')}
-       className="w-12 h-12 flex items-center justify-center rounded-2xl bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none text-slate-700 dark:text-white/60 border border-slate-300 dark:border-slate-700 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30 transition-all"
+       onClick={() => {
+         if (window.confirm('Apakah Anda yakin ingin keluar?')) {
+           navigate('/login');
+         }
+       }}
+       className="w-full h-12 flex items-center px-4 rounded-2xl bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none text-slate-700 dark:text-white/60 border border-slate-300 dark:border-slate-700 hover:bg-red-500/20 hover:text-red-400 hover:border-red-500/30 transition-all"
        title="Keluar"
       >
-       <LogOut className="w-5 h-5" />
+       <LogOut className="w-5 h-5 shrink-0" />
+       <span className="ml-4 font-semibold text-sm">Keluar</span>
       </button>
      </div>
     </aside>
@@ -70,7 +76,7 @@ export default function AdminLayout() {
       <header className="md:hidden flex items-center justify-between p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 mb-6 z-20 shadow-lg">
        <div className="flex items-center gap-3">
         <div className="w-10 h-10 flex items-center justify-center p-1.5 rounded-xl bg-slate-200 dark:bg-slate-700 shadow-sm dark:shadow-none border border-white/10">
-         <img src="/logo.png" alt="SentraKreasi" className="w-full h-full object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] dark:drop-shadow-sm brightness-110 dark:brightness-200" />
+         <img src="/logo.png" alt="SentraKreasi" className="w-full h-full object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] dark:drop-shadow-sm brightness-110 dark:brightness-200 invert dark:invert-0" />
         </div>
        </div>
        <div className="flex items-center gap-3">
@@ -80,8 +86,20 @@ export default function AdminLayout() {
        </div>
       </header>
 
-      <div className="flex-1 overflow-auto pb-28 md:pb-0 z-10 custom-scrollbar rounded-[2rem] bg-transparent">
+      {/* Desktop Header */}
+      <header className="hidden md:flex items-center justify-between p-6 bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-sm border border-slate-300 dark:border-slate-700 mb-6 z-20">
+        <h2 className="text-xl font-bold text-slate-800 dark:text-white">Admin Panel Sentra Kreasi</h2>
+        <div className="flex items-center gap-4 text-sm font-medium text-slate-600 dark:text-slate-300">
+          <span>Sistem Manajemen Terpadu</span>
+        </div>
+      </header>
+
+      <div className="flex-1 overflow-auto pb-28 md:pb-0 z-10 custom-scrollbar rounded-[2rem] bg-transparent flex flex-col">
        <Outlet />
+       {/* Desktop Footer */}
+       <footer className="hidden md:block mt-8 py-4 text-center text-sm text-slate-500 border-t border-slate-300 dark:border-slate-700">
+         &copy; {new Date().getFullYear()} Sentra Kreasi. Hak cipta dilindungi.
+       </footer>
       </div>
     </main>
 

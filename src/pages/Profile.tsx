@@ -1,4 +1,4 @@
-import { User, Mail, Phone, MapPin, Save, Camera, AlertCircle, Upload, X } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Save, Camera, AlertCircle, Upload, X, CheckCircle, Trash2 } from 'lucide-react';
 import Webcam from 'react-webcam';
 import { useRef } from 'react';
 import { useState, useEffect } from 'react';
@@ -47,7 +47,21 @@ export default function Profile() {
    if (pegawai) localStorage.setItem(`profile_photo_${pegawai.id}`, imageSrc);
    setShowPhotoModal(false);
    setUseCamera(false);
+   showSnackbar('Foto profil berhasil diubah.');
   }
+ };
+
+ const handleDeletePhoto = () => {
+  setProfilePhoto(null);
+  if (pegawai) localStorage.removeItem(`profile_photo_${pegawai.id}`);
+  setShowPhotoModal(false);
+  showSnackbar('Foto profil berhasil dihapus.');
+ };
+
+ const [snackbarMsg, setSnackbarMsg] = useState('');
+ const showSnackbar = (msg: string) => {
+  setSnackbarMsg(msg);
+  setTimeout(() => setSnackbarMsg(''), 3000);
  };
 
 
@@ -89,6 +103,7 @@ export default function Profile() {
   setTimeout(() => {
    setIsSaving(false);
    setIsSaved(true);
+   showSnackbar('Informasi profil berhasil diperbarui.');
    setTimeout(() => setIsSaved(false), 3000);
   }, 1000);
  };
@@ -104,6 +119,13 @@ export default function Profile() {
     <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-white/60">Profil Pengguna</h1>
     <p className="text-sm font-medium text-slate-700 dark:text-white/50 mt-2">Kelola data personal dan biometrik Anda.</p>
    </div>
+
+   {snackbarMsg && (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-green-500 text-white dark:text-black px-6 py-3 rounded-full font-bold shadow-lg flex items-center gap-2 animate-in slide-in-from-bottom-4 z-50">
+     <CheckCircle className="w-5 h-5" />
+     {snackbarMsg}
+    </div>
+   )}
 
    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pb-6">
     <div className="bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-3xl p-8 flex flex-col items-center text-center h-max transition-all relative overflow-hidden">
@@ -244,11 +266,19 @@ export default function Profile() {
           <Camera className="w-8 h-8 text-green-500" />
           <span className="font-semibold text-slate-700 dark:text-white">Gunakan Kamera</span>
          </button>
+         
+         {profilePhoto && (
+          <button onClick={handleDeletePhoto} className="mt-2 w-full py-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-2xl flex items-center justify-center gap-2 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-500 transition-colors">
+           <Trash2 className="w-5 h-5" />
+           <span className="font-semibold">Hapus Foto Profil</span>
+          </button>
+         )}
         </div>
        ) : (
         <div className="space-y-4">
          <div className="rounded-2xl overflow-hidden border-2 border-green-500 bg-black aspect-video relative">
           <Webcam
+           disablePictureInPicture
            ref={webcamRef}
            screenshotFormat="image/jpeg"
            className="w-full h-full object-cover"

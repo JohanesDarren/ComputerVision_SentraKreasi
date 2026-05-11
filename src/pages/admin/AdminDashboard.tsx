@@ -19,22 +19,29 @@ export default function AdminDashboard() {
  useEffect(() => {
   async function loadDashboardData() {
    setIsLoading(true);
-   try {
-    const { count: cPegawai } = await supabase.from('pegawai').select('*', { count: 'exact', head: true });
-    
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const { count: cHadir } = await supabase
-     .from('presensi')
-     .select('*', { count: 'exact', head: true })
-     .in('status', ['masuk', 'hadir'])
-     .gte('waktu_hadir', today.toISOString());
+    // Filter Date
+    let filterDate = new Date();
+    filterDate = setYear(filterDate, selectedYear);
+    filterDate = setMonth(filterDate, selectedMonth);
+    const startM = startOfMonth(filterDate);
+    const endM = endOfMonth(filterDate);
+
+    try {
+     const { count: cPegawai } = await supabase.from('pegawai').select('*', { count: 'exact', head: true });
      
-    const { count: cTelat } = await supabase
-     .from('presensi')
-     .select('*', { count: 'exact', head: true })
-     .eq('status', 'telat')
-     .gte('waktu_hadir', today.toISOString());
+     const { count: cHadir } = await supabase
+      .from('presensi')
+      .select('*', { count: 'exact', head: true })
+      .in('status', ['masuk', 'hadir'])
+      .gte('waktu_hadir', startM.toISOString())
+      .lte('waktu_hadir', endM.toISOString());
+      
+     const { count: cTelat } = await supabase
+      .from('presensi')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'telat')
+      .gte('waktu_hadir', startM.toISOString())
+      .lte('waktu_hadir', endM.toISOString());
     
     setStats({
      totalPegawai: cPegawai || 0,
@@ -42,20 +49,15 @@ export default function AdminDashboard() {
      telatHariIni: cTelat || 0
     });
 
-    const { data: recent } = await supabase
-     .from('presensi')
-     .select('id, waktu_hadir, status, gambar_bukti_url, pegawai:pegawai_id (nama, nip)')
-     .order('waktu_hadir', { ascending: false })
-     .limit(5);
+     const { data: recent } = await supabase
+      .from('presensi')
+      .select('id, waktu_hadir, status, gambar_bukti_url, pegawai:pegawai_id (nama, nip)')
+      .gte('waktu_hadir', startM.toISOString())
+      .lte('waktu_hadir', endM.toISOString())
+      .order('waktu_hadir', { ascending: false })
+      .limit(5);
 
-    if (recent) setRecentPresensi(recent);
-
-    // Filter Date
-    let filterDate = new Date();
-    filterDate = setYear(filterDate, selectedYear);
-    filterDate = setMonth(filterDate, selectedMonth);
-    const startM = startOfMonth(filterDate);
-    const endM = endOfMonth(filterDate);
+     if (recent) setRecentPresensi(recent);
 
     // Fetch chart data (monthly averages)
     const { data: historyData } = await supabase
@@ -178,7 +180,7 @@ export default function AdminDashboard() {
        <UserCheck className="w-6 h-6" />
       </div>
       <div>
-       <p className="text-xs font-semibold text-slate-700 dark:text-white/80 uppercase tracking-widest">Hadir Hari Ini</p>
+       <p className="text-xs font-semibold text-slate-700 dark:text-white/80 uppercase tracking-widest">Total Hadir</p>
        <h3 className="text-4xl font-bold mt-1 text-slate-900 dark:text-white">
         {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-slate-700 dark:text-white/50" /> : stats.hadirHariIni}
        </h3>
@@ -196,7 +198,7 @@ export default function AdminDashboard() {
        <AlertCircle className="w-6 h-6" />
       </div>
       <div>
-       <p className="text-xs font-semibold text-slate-700 dark:text-white/50 uppercase tracking-widest">Telat Hari Ini</p>
+       <p className="text-xs font-semibold text-slate-700 dark:text-white/50 uppercase tracking-widest">Total Telat</p>
        <h3 className="text-4xl font-bold mt-1 text-slate-900 dark:text-white">
         {isLoading ? <Loader2 className="w-6 h-6 animate-spin text-slate-700 dark:text-white/50" /> : stats.telatHariIni}
        </h3>
@@ -212,7 +214,7 @@ export default function AdminDashboard() {
     <div className="bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-3xl p-6 flex flex-col">
      <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-300 dark:border-slate-700">
       <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
-        <TrendingUp className="w-5 h-5 text-green-400" /> Log Presensi Terakhir (Real-time)
+        <TrendingUp className="w-5 h-5 text-green-400" /> Log Presensi Terakhir (Terfilter)
       </h3>
      </div>
      <div className="flex-1 space-y-4">

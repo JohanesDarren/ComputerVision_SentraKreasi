@@ -111,7 +111,7 @@ export default function Dashboard() {
   <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8 relative text-slate-900 dark:text-white">
    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
     <div>
-     <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-white/60">
+     <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-white/60 pb-2">
       {isLoading ? 'Memuat...' : pegawai ? `Selamat Datang, ${pegawai.nama.split(' ')[0]}` : 'Selamat Datang'}
      </h1>
      <p className="text-sm font-medium text-slate-700 dark:text-white/50 mt-2">
@@ -229,7 +229,7 @@ export default function Dashboard() {
       </div>
      ) : (
       <ResponsiveContainer width="100%" height="100%">
-       <LineChart data={chartData} margin={{ top: 20, right: 30, left: -20, bottom: 0 }}>
+       <LineChart data={chartData} margin={{ top: 20, right: 30, left: 0, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={theme === 'dark' ? '#ffffff10' : '#00000010'} vertical={false} />
         <XAxis dataKey="date" stroke={theme === 'dark' ? '#ffffff50' : '#0f172a50'} fontSize={12} tickLine={false} axisLine={false} dy={10} />
         <YAxis 
@@ -244,7 +244,7 @@ export default function Dashboard() {
         />
         <Tooltip 
          contentStyle={{ backgroundColor: theme === 'dark' ? '#0f172a' : '#ffffff', border: theme === 'dark' ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)', borderRadius: '1rem', color: theme === 'dark' ? '#fff' : '#000' }}
-         formatter={(value: any, name: string) => [formatHourTooltip(value as number), name === 'masuk' ? 'Jam Masuk' : 'Jam Pulang']}
+         formatter={(value: any, name: string) => [formatHourTooltip(value as number), name]}
          labelFormatter={(label) => `Tanggal ${label}`}
         />
         <Legend wrapperStyle={{ paddingTop: '20px' }} />

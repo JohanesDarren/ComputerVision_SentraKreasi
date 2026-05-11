@@ -7,6 +7,9 @@ import { id as localeID } from 'date-fns/locale';
 export default function History() {
  const [historyData, setHistoryData] = useState<any[]>([]);
  const [isLoading, setIsLoading] = useState(true);
+ const [searchQuery, setSearchQuery] = useState('');
+ const [dateFilter, setDateFilter] = useState('');
+ const [limit, setLimit] = useState(20);
 
  useEffect(() => {
   async function fetchHistory() {
@@ -57,7 +60,7 @@ export default function History() {
     .select(`id, waktu_hadir, status, gambar_bukti_url, pegawai:pegawai_id (nama, nip)`)
     .eq('pegawai_id', userId)
     .order('waktu_hadir', { ascending: false })
-    .limit(20);
+    .limit(1000);
 
    if (error) console.error('Error fetching history:', error);
    else setHistoryData(data || []);
@@ -65,6 +68,14 @@ export default function History() {
   }
   fetchHistory();
  }, []);
+
+ const filteredData = historyData.filter(item => {
+  const matchStatus = item.status?.toLowerCase().includes(searchQuery.toLowerCase());
+  const matchDate = dateFilter ? format(new Date(item.waktu_hadir), 'yyyy-MM-dd') === dateFilter : true;
+  return matchStatus && matchDate;
+ });
+
+ const displayData = filteredData.slice(0, limit);
 
  return (
   <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8 text-slate-900 dark:text-white relative">
@@ -84,20 +95,35 @@ export default function History() {
       <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 dark:text-white/40" />
       <input 
        type="text" 
-       placeholder="Cari..." 
+       value={searchQuery}
+       onChange={(e) => setSearchQuery(e.target.value)}
+       placeholder="Cari Status..." 
        className="pl-12 pr-4 py-3 rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none text-sm focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40 w-full md:w-48 lg:w-64 transition-all shadow-inner"
       />
      </div>
-     <button className="p-3 px-6 rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none hover:bg-slate-200 dark:bg-slate-700 shadow-sm dark:shadow-none flex items-center gap-2 text-sm font-semibold text-slate-900 dark:text-white transition-all ">
-      <Filter className="w-4 h-4" />
-      <span className="hidden sm:inline">Filter</span>
-     </button>
+     <div className="relative">
+      <input 
+       type="date" 
+       value={dateFilter}
+       onChange={(e) => setDateFilter(e.target.value)}
+       className="px-4 py-3 rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none text-sm focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 text-slate-900 dark:text-white w-full md:w-40 transition-all shadow-inner"
+      />
+     </div>
     </div>
    </div>
 
    <div className="bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-3xl overflow-hidden flex flex-col transition-colors relative z-10">
-    <div className="p-6 border-b border-slate-300 dark:border-slate-700 bg-white/5">
+    <div className="p-6 border-b border-slate-300 dark:border-slate-700 bg-white/5 flex justify-between items-center">
       <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Log Area Pindai</h3>
+      <select 
+        value={limit} 
+        onChange={(e) => setLimit(Number(e.target.value))}
+        className="px-3 py-1.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:border-green-500/50 transition-colors"
+      >
+        <option value={10}>10 Entri</option>
+        <option value={20}>20 Entri</option>
+        <option value={50}>50 Entri</option>
+      </select>
     </div>
     <div className="overflow-x-auto">
      <table className="w-full text-left border-collapse min-w-[700px]">
@@ -119,14 +145,14 @@ export default function History() {
           </div>
          </td>
         </tr>
-       ) : historyData.length === 0 ? (
+       ) : displayData.length === 0 ? (
         <tr>
          <td colSpan={5} className="py-16 text-center text-slate-700 dark:text-white/50">
           <div className="text-sm font-semibold">Belum ada riwayat presensi</div>
          </td>
         </tr>
-       ) : historyData.map((item) => (
-        <tr key={item.id} className="hover:bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none transition-colors group">
+       ) : displayData.map((item) => (
+        <tr key={item.id} className="hover:bg-slate-100 dark:hover:bg-slate-700/50 shadow-sm dark:shadow-none transition-colors group">
          <td className="py-4 px-6 flex items-center gap-4">
           <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-green-400/20 dark:bg-green-500/10 text-green-400 border border-green-500/20 group-hover:bg-green-500 group-hover:text-white dark:text-black transition-colors overflow-hidden shrink-0">
             {item.gambar_bukti_url ? (
@@ -173,11 +199,7 @@ export default function History() {
     </div>
     
     <div className="p-5 bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none border-t border-slate-300 dark:border-slate-700 flex items-center justify-between">
-     <span className="text-xs font-medium text-slate-700 dark:text-white/40">Menampilkan 20 entri terakhir</span>
-     <div className="flex gap-2">
-      <button className="px-4 py-2 rounded-full border border-slate-300 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-white/70 hover:bg-slate-200 dark:bg-slate-700 shadow-sm dark:shadow-none hover:text-slate-900 dark:text-white transition-all">Sebelumnya</button>
-      <button className="px-4 py-2 rounded-full border border-slate-300 dark:border-slate-700 text-xs font-semibold text-slate-700 dark:text-white/70 hover:bg-slate-200 dark:bg-slate-700 shadow-sm dark:shadow-none hover:text-slate-900 dark:text-white transition-all">Selanjutnya</button>
-     </div>
+     <span className="text-xs font-medium text-slate-700 dark:text-white/40">Menampilkan {displayData.length} entri terakhir</span>
     </div>
    </div>
   </div>

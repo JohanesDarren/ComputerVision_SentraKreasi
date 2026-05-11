@@ -143,12 +143,13 @@ export default function QuickPresence() {
     </div>
 
     <div className="text-center mb-8">
-     <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-2">Presensi Cepat</h1>
+     <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-2">Quick Presence</h1>
      <p className="text-slate-600 dark:text-slate-400">Arahkan wajah Anda ke kamera untuk melakukan presensi tanpa login.</p>
     </div>
 
     <div className="relative overflow-hidden bg-black border border-slate-300 dark:border-slate-700 rounded-[2.5rem] aspect-[4/3] md:aspect-[16/9] isolate flex items-center justify-center shadow-2xl">
      <Webcam
+      disablePictureInPicture
       audio={false}
       ref={webcamRef}
       screenshotFormat="image/jpeg"

@@ -22,6 +22,30 @@ export default function AdminHistory() {
   }
  };
 
+ const handleExportCSV = () => {
+  const csvRows = [];
+  const headers = ['Nama', 'NIP', 'Waktu', 'Status'];
+  csvRows.push(headers.join(','));
+
+  filteredData.forEach(item => {
+   const row = [
+    `"${item.pegawai?.nama || ''}"`,
+    `"${item.pegawai?.nip || ''}"`,
+    `"${item.waktu_hadir ? format(new Date(item.waktu_hadir), 'yyyy-MM-dd HH:mm:ss') : ''}"`,
+    `"${item.status || ''}"`
+   ];
+   csvRows.push(row.join(','));
+  });
+
+  const csvString = csvRows.join('\n');
+  const blob = new Blob([csvString], { type: 'text/csv' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.setAttribute('href', url);
+  a.setAttribute('download', `Presensi_Export_${format(new Date(), 'yyyyMMdd_HHmmss')}.csv`);
+  a.click();
+ };
+
  const filteredData = historyData.filter(item => {
   const matchName = item.pegawai?.nama?.toLowerCase().includes(searchQuery.toLowerCase()) || 
            item.pegawai?.nip?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -137,10 +161,10 @@ export default function AdminHistory() {
        className="px-4 py-3 rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none text-sm focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 text-slate-900 dark:text-white w-full md:w-40 transition-all shadow-inner"
       />
      </div>
-     <button className="p-3 px-6 rounded-full border border-green-500/30 bg-green-500 text-white dark:text-black dark:text-black shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:bg-green-400 flex items-center gap-2 text-sm font-bold transition-all">
-      <Download className="w-4 h-4" />
-      <span className="hidden sm:inline">Export CSV</span>
-     </button>
+      <button onClick={handleExportCSV} className="p-3 px-6 rounded-full border border-green-500/30 bg-green-500 text-white dark:text-black dark:text-black shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:bg-green-400 flex items-center gap-2 text-sm font-bold transition-all">
+       <Download className="w-4 h-4" />
+       <span className="hidden sm:inline">Export CSV</span>
+      </button>
     </div>
    </div>
 
@@ -174,7 +198,7 @@ export default function AdminHistory() {
          </td>
         </tr>
        ) : paginatedData.map((item) => (
-        <tr key={item.id} className="hover:bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none transition-colors group">
+        <tr key={item.id} className="hover:bg-slate-100 dark:hover:bg-slate-700/50 shadow-sm dark:shadow-none transition-colors group">
          <td className="py-4 px-6 flex items-center gap-4">
           <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-slate-200 dark:bg-slate-700 shadow-sm dark:shadow-none text-slate-700 dark:text-white/80 border border-slate-300 dark:border-slate-700 group-hover:bg-green-500 group-hover:text-white dark:text-black transition-colors overflow-hidden shrink-0">
             {item.gambar_bukti_url ? (

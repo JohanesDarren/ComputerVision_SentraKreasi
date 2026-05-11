@@ -27,7 +27,7 @@ export default function Landing() {
    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 border-b border-slate-900/5 dark:border-white/5 ${scrolled ? 'bg-white/80 dark:bg-[#021811]/80 py-4 shadow-lg' : 'bg-transparent py-5'}`}>
     <div className="max-w-[1200px] mx-auto px-6 flex items-center justify-between">
      <div className="flex items-center gap-2">
-      <img src="/logo.png" alt="Sentra Kreasi Logo" className="h-8 md:h-10 object-contain drop-shadow-sm drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] dark:drop-shadow-sm brightness-110 dark:brightness-200" />
+      <img src="/logo.png" alt="Sentra Kreasi Logo" className="h-10 md:h-14 object-contain drop-shadow-sm drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] dark:drop-shadow-sm brightness-110 dark:brightness-200 invert dark:invert-0" />
      </div>
 
      <div className="hidden md:flex items-center gap-10 text-sm font-semibold text-slate-600 dark:text-white/70">
@@ -165,38 +165,77 @@ export default function Landing() {
      </div>
     </section>
 
+    {/* KONTAK SECTION */}
+    <section className="py-20 mb-10 border-t border-slate-200 dark:border-white/10" id="hubungi">
+      <div className="text-center mb-16">
+        <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900 dark:text-white">Hubungi Kami</h2>
+        <p className="text-slate-600 font-medium dark:text-slate-400 max-w-xl mx-auto">Kami siap membantu Anda memulai transformasi manajemen instansi.</p>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
+        {/* List Kontak */}
+        <div className="flex flex-col gap-6">
+          <a href="https://maps.google.com/?q=Sentrakreasi+Bandung+-7.0145892,107.595449" target="_blank" rel="noopener noreferrer" className="flex items-center gap-6 p-6 bg-white/80 dark:bg-white/5 shadow-sm dark:shadow-none border border-slate-200/60 dark:border-white/10 rounded-3xl hover:bg-white dark:hover:bg-white/10 transition-all group">
+            <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-500 dark:text-white/60 group-hover:text-emerald-500 transition-colors shrink-0 shadow-inner dark:shadow-none">
+              <MapPin className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg text-slate-800 dark:text-white/90 mb-1">Alamat</h3>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed">Jl. Sentra Kreasi Bandung, Jawa Barat</p>
+            </div>
+          </a>
+          
+          <a href="https://instagram.com/sentrakreasi.ukm" target="_blank" rel="noopener noreferrer" className="flex items-center gap-6 p-6 bg-white/80 dark:bg-white/5 shadow-sm dark:shadow-none border border-slate-200/60 dark:border-white/10 rounded-3xl hover:bg-white dark:hover:bg-white/10 transition-all group">
+            <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-500 dark:text-white/60 group-hover:text-emerald-500 transition-colors shrink-0 shadow-inner dark:shadow-none">
+              <Instagram className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg text-slate-800 dark:text-white/90 mb-1">Instagram</h3>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">@sentrakreasi.ukm</p>
+            </div>
+          </a>
+          
+          <a href="tel:+6289611284382" className="flex items-center gap-6 p-6 bg-white/80 dark:bg-white/5 shadow-sm dark:shadow-none border border-slate-200/60 dark:border-white/10 rounded-3xl hover:bg-white dark:hover:bg-white/10 transition-all group">
+            <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-500 dark:text-white/60 group-hover:text-emerald-500 transition-colors shrink-0 shadow-inner dark:shadow-none">
+              <Phone className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg text-slate-800 dark:text-white/90 mb-1">Telepon</h3>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">0896-1128-4382</p>
+            </div>
+          </a>
+          
+          <a href="mailto:sentrakreasibandung@gmail.com" className="flex items-center gap-6 p-6 bg-white/80 dark:bg-white/5 shadow-sm dark:shadow-none border border-slate-200/60 dark:border-white/10 rounded-3xl hover:bg-white dark:hover:bg-white/10 transition-all group">
+            <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-white/10 flex items-center justify-center text-slate-500 dark:text-white/60 group-hover:text-emerald-500 transition-colors shrink-0 shadow-inner dark:shadow-none">
+              <Mail className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-lg text-slate-800 dark:text-white/90 mb-1">Email</h3>
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400">sentrakreasibandung@gmail.com</p>
+            </div>
+          </a>
+        </div>
+        
+        {/* Peta */}
+        <div className="w-full h-full min-h-[350px] lg:min-h-full rounded-3xl overflow-hidden border border-slate-200/60 dark:border-white/10 relative shadow-sm dark:shadow-none p-2 bg-white/50 dark:bg-white/5">
+          <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.5983792078696!2d107.59287407584102!3d-6.938515067923769!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68e8bff5055b17%3A0xc6a287900b467bd9!2sSentra%20Kreasi!5e0!3m2!1sen!2sid!4v1700000000000!5m2!1sen!2sid" 
+            className="absolute inset-2 w-[calc(100%-16px)] h-[calc(100%-16px)] rounded-2xl" 
+            style={{border:0}} 
+            allowFullScreen={false} 
+            loading="lazy" 
+            referrerPolicy="no-referrer-when-downgrade"
+          ></iframe>
+        </div>
+      </div>
+    </section>
+
     {/* FOOTER */}
-    <footer className="pt-20 border-t border-slate-200 dark:border-white/10" id="hubungi">
-     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-       <a href="https://instagram.com/sentrakreasi.ukm" target="_blank" rel="noopener noreferrer" className="bg-white/80 dark:bg-white/5 shadow-md dark:shadow-none border border-slate-200/60 dark:border-white/10 rounded-3xl p-8 flex flex-col items-center justify-center text-center hover:bg-white dark:hover:bg-white/10 transition-all group ">
-        <Instagram className="w-8 h-8 mb-4 text-slate-500 dark:text-white/60 group-hover:text-emerald-500 transition-colors" />
-        <h3 className="font-bold mb-1 text-slate-800 dark:text-white/90">Instagram</h3>
-        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">@sentrakreasi.ukm</p>
-       </a>
-
-       <a href="https://maps.google.com/?q=Sentrakreasi+Bandung+-7.0145892,107.595449" target="_blank" rel="noopener noreferrer" className="bg-white/80 dark:bg-white/5 shadow-md dark:shadow-none border border-slate-200/60 dark:border-white/10 rounded-3xl p-8 flex flex-col items-center justify-center text-center hover:bg-white dark:hover:bg-white/10 transition-all group ">
-        <MapPin className="w-8 h-8 mb-4 text-slate-500 dark:text-white/60 group-hover:text-emerald-500 transition-colors" />
-        <h3 className="font-bold mb-1 text-slate-800 dark:text-white/90">Lokasi Kami</h3>
-        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Buka Di Peta</p>
-       </a>
-
-       <a href="tel:+6289611284382" className="bg-white/80 dark:bg-white/5 shadow-md dark:shadow-none border border-slate-200/60 dark:border-white/10 rounded-3xl p-8 flex flex-col items-center justify-center text-center hover:bg-white dark:hover:bg-white/10 transition-all group ">
-        <Phone className="w-8 h-8 mb-4 text-slate-500 dark:text-white/60 group-hover:text-emerald-500 transition-colors" />
-        <h3 className="font-bold mb-1 text-slate-800 dark:text-white/90">Telepon</h3>
-        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">0896-1128-4382</p>
-       </a>
-
-       <a href="mailto:sentrakreasibandung@gmail.com" className="bg-white/80 dark:bg-white/5 shadow-md dark:shadow-none border border-slate-200/60 dark:border-white/10 rounded-3xl p-8 flex flex-col items-center justify-center text-center hover:bg-white dark:hover:bg-white/10 transition-all group ">
-        <Mail className="w-8 h-8 mb-4 text-slate-500 dark:text-white/60 group-hover:text-emerald-500 transition-colors" />
-        <h3 className="font-bold mb-1 text-slate-800 dark:text-white/90">Email</h3>
-        <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Bantuan Support</p>
-       </a>
-     </div>
-
-     <div className="flex flex-col md:flex-row justify-between items-center pt-8 pb-8 gap-6 text-sm font-medium text-slate-500 dark:text-slate-400">
-       <img src="/logo.png" alt="Sentra Kreasi Logo" className="h-8 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] dark:drop-shadow-sm brightness-110 dark:brightness-200 opacity-80" />
-       <p>&copy; {new Date().getFullYear()} SentraKreasi. All rights reserved.</p>
-     </div>
+    <footer className="py-8 border-t border-slate-200 dark:border-white/10">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-sm font-medium text-slate-500 dark:text-slate-400">
+       <img src="/logo.png" alt="Sentra Kreasi Logo" className="h-10 md:h-12 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] dark:drop-shadow-sm brightness-110 dark:brightness-200 opacity-80 invert dark:invert-0" />
+       <p>&copy; {new Date().getFullYear()} SentraKreasi. Hak cipta dilindungi.</p>
+      </div>
     </footer>
 
     {/* Floating WhatsApp Action Button */}

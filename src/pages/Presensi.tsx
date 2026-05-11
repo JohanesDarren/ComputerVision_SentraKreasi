@@ -126,12 +126,13 @@ export default function Presensi() {
  return (
   <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 text-slate-900 dark:text-white">
    <div className="mb-4 bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-3xl p-8 ">
-    <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-white/60">Biometrik Cerdas</h1>
-    <p className="text-sm font-medium text-slate-700 dark:text-white/50 mt-2">Arahkan wajah ke kamera, AI akan mendeteksi ekspresi Anda.</p>
+    <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-white/60">Quick Presence</h1>
+    <p className="text-sm font-medium text-slate-700 dark:text-white/50 mt-2">Arahkan wajah ke kamera untuk melakukan presensi cepat.</p>
    </div>
 
    <div className="relative overflow-hidden bg-black border border-slate-300 dark:border-slate-700 rounded-[2.5rem] aspect-[4/3] md:aspect-[16/9] isolate flex items-center justify-center shadow-2xl">
     <Webcam
+     disablePictureInPicture
      audio={false}
      ref={webcamRef}
      screenshotFormat="image/jpeg"
