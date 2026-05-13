@@ -5,9 +5,7 @@ import { supabase } from '../../lib/supabase';
 export default function AdminPegawai() {
  const [pegawai, setPegawai] = useState<any[]>([]);
  const [isLoading, setIsLoading] = useState(true);
- const [showAddModal, setShowAddModal] = useState(false);
- const [newPegawai, setNewPegawai] = useState({ nama: '', nip: '', email: '', password: '' });
- const [isSubmitting, setIsSubmitting] = useState(false);
+ const [searchQuery, setSearchQuery] = useState('');
 
  useEffect(() => {
   fetchPegawai();
@@ -26,24 +24,13 @@ export default function AdminPegawai() {
   fetchPegawai();
  };
 
- const handleAdd = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsSubmitting(true);
-  try {
-   const { error } = await supabase.from('pegawai').insert([newPegawai]);
-   if (error) throw error;
-   setShowAddModal(false);
-   setNewPegawai({ nama: '', nip: '', email: '', password: '' });
-   fetchPegawai();
-  } catch (err) {
-   alert('Gagal menambahkan pegawai. NIP atau Email mungkin sudah digunakan.');
-  } finally {
-   setIsSubmitting(false);
-  }
- };
+ const filteredPegawai = pegawai.filter(item => 
+  (item.nama?.toLowerCase().includes(searchQuery.toLowerCase()) || false) || 
+  (item.nip?.toLowerCase().includes(searchQuery.toLowerCase()) || false)
+ );
 
  return (
-  <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8 text-slate-900 dark:text-white relative">
+  <div className="w-full max-w-none mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8 text-slate-900 dark:text-white relative">
    <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-green-400/20 dark:bg-green-500/10 rounded-full blur-[150px] pointer-events-none -z-10 mix-blend-screen"></div>
 
    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -58,14 +45,12 @@ export default function AdminPegawai() {
       <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 dark:text-white/40" />
       <input 
        type="text" 
+       value={searchQuery}
+       onChange={(e) => setSearchQuery(e.target.value)}
        placeholder="Cari NIP / Nama..." 
        className="pl-12 pr-4 py-3 rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none text-sm focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40 w-full md:w-48 lg:w-64 transition-all shadow-inner"
       />
      </div>
-     <button onClick={() => setShowAddModal(true)} className="p-3 px-6 rounded-full border border-green-500/30 bg-green-500 text-white dark:text-black dark:text-black shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:bg-green-400 flex items-center gap-2 text-sm font-bold transition-all">
-      <Plus className="w-4 h-4" />
-      <span className="hidden sm:inline">Tambah Pegawai</span>
-     </button>
     </div>
    </div>
 
@@ -73,9 +58,9 @@ export default function AdminPegawai() {
     <div className="p-6 border-b border-slate-300 dark:border-slate-700 bg-white/5">
       <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Daftar Pegawai Aktif</h3>
     </div>
-    <div className="overflow-x-auto">
+    <div className="overflow-auto max-h-[60vh] custom-scrollbar">
      <table className="w-full text-left border-collapse min-w-[800px]">
-      <thead>
+      <thead className="sticky top-0 z-10 bg-slate-100 dark:bg-slate-800">
        <tr className="border-b border-slate-300 dark:border-slate-700 bg-black/20">
         <th className="py-4 px-6 text-xs font-semibold text-slate-700 dark:text-white/50 uppercase tracking-widest">Profil</th>
         <th className="py-4 px-6 text-xs font-semibold text-slate-700 dark:text-white/50 uppercase tracking-widest">Email</th>
@@ -92,13 +77,13 @@ export default function AdminPegawai() {
           </div>
          </td>
         </tr>
-       ) : pegawai.length === 0 ? (
+       ) : filteredPegawai.length === 0 ? (
         <tr>
          <td colSpan={4} className="py-16 text-center text-slate-700 dark:text-white/50">
-          <div className="text-sm font-semibold">Tidak ada data pegawai</div>
+          <div className="text-sm font-semibold">Tidak ada data pegawai yang sesuai</div>
          </td>
         </tr>
-       ) : pegawai.map((item) => (
+       ) : filteredPegawai.map((item) => (
         <tr key={item.id} className="hover:bg-slate-100 dark:hover:bg-slate-700/50 shadow-sm dark:shadow-none transition-colors group">
          <td className="py-4 px-6 flex items-center gap-4">
           <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm bg-green-400/20 dark:bg-green-500/10 text-green-400 border border-green-500/20 group-hover:bg-green-500 group-hover:text-white dark:text-black transition-colors overflow-hidden shrink-0">
@@ -143,39 +128,7 @@ export default function AdminPegawai() {
     </div>
    </div>
 
-   {showAddModal && (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-     <div className="bg-slate-100 dark:bg-slate-800 shadow-xl border border-slate-300 dark:border-slate-700 w-full max-w-md rounded-3xl overflow-hidden animate-in zoom-in-95 duration-200">
-      <div className="p-6 border-b border-slate-300 dark:border-slate-700 flex justify-between items-center">
-       <h3 className="text-xl font-bold">Tambah Pegawai</h3>
-       <button onClick={() => setShowAddModal(false)} className="text-slate-700 dark:text-white/50 hover:text-slate-900 dark:text-white">
-        <X className="w-6 h-6" />
-       </button>
-      </div>
-      <form onSubmit={handleAdd} className="p-6 space-y-4">
-       <div>
-        <label className="text-xs font-medium text-slate-700 dark:text-white/70 block mb-1">Nama Lengkap</label>
-        <input required type="text" value={newPegawai.nama} onChange={e => setNewPegawai({...newPegawai, nama: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:border-green-500 focus:outline-none" />
-       </div>
-       <div>
-        <label className="text-xs font-medium text-slate-700 dark:text-white/70 block mb-1">NIP</label>
-        <input required type="text" value={newPegawai.nip} onChange={e => setNewPegawai({...newPegawai, nip: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:border-green-500 focus:outline-none" />
-       </div>
-       <div>
-        <label className="text-xs font-medium text-slate-700 dark:text-white/70 block mb-1">Email</label>
-        <input required type="email" value={newPegawai.email} onChange={e => setNewPegawai({...newPegawai, email: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:border-green-500 focus:outline-none" />
-       </div>
-       <div>
-        <label className="text-xs font-medium text-slate-700 dark:text-white/70 block mb-1">Password</label>
-        <input required type="password" value={newPegawai.password} onChange={e => setNewPegawai({...newPegawai, password: e.target.value})} className="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-sm focus:border-green-500 focus:outline-none" />
-       </div>
-       <button disabled={isSubmitting} type="submit" className="w-full mt-4 py-3 bg-green-500 text-white font-bold rounded-xl hover:bg-green-400 transition-colors">
-        {isSubmitting ? 'Menyimpan...' : 'Simpan Pegawai'}
-       </button>
-      </form>
-     </div>
-    </div>
-   )}
+
 
   </div>
  );

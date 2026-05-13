@@ -1,11 +1,13 @@
 import { useState, useRef } from 'react';
 import Webcam from 'react-webcam';
-import { Camera, CheckCircle, RefreshCw, Upload, AlertCircle, Trash2 } from 'lucide-react';
+import { Camera, CheckCircle, RefreshCw, Upload, AlertCircle, Trash2, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { registerFace } from '../lib/api';
 
-export default function RegisterFace() {
- const webcamRef = useRef<Webcam>(null);
+ export default function RegisterFace() {
+  const navigate = useNavigate();
+  const webcamRef = useRef<Webcam>(null);
  
  const [formData, setFormData] = useState({ nama: '', nip: '' });
  const [capturedImages, setCapturedImages] = useState<{depan: string|null, kiri: string|null, kanan: string|null}>({
@@ -76,7 +78,14 @@ export default function RegisterFace() {
 
  return (
   <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8">
-   <div className="bg-[#FAF8F5] dark:bg-[#2A2621] border-[4px] border-[#2C2825] dark:border-[#EFEBE1] p-6 mb-6">
+   <div className="bg-[#FAF8F5] dark:bg-[#2A2621] border-[4px] border-[#2C2825] dark:border-[#EFEBE1] p-6 mb-6 relative">
+    <button 
+     onClick={() => navigate('/')} 
+     className="absolute top-6 right-6 p-2 bg-[#EFEBE1] dark:bg-[#151413] border-[3px] border-[#2C2825] dark:border-[#EFEBE1] hover:bg-[#386641] hover:text-white transition-colors"
+     title="Kembali ke Utama"
+    >
+     <ArrowLeft className="w-6 h-6" />
+    </button>
     <h1 className="font-[Bebas_Neue] text-5xl tracking-wide uppercase text-[#2C2825] dark:text-[#EFEBE1]">Pendaftaran Wajah Baru</h1>
     <p className="text-[10px] font-bold text-[#6B5A4B] dark:text-[#A89886] uppercase tracking-widest mt-2 border-t-[3px] border-[#2C2825] dark:border-[#EFEBE1] pt-4">Sistem 3 Sudut (Depan, Kiri, Kanan) untuk akurasi presensi tertinggi.</p>
    </div>

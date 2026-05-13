@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ShieldCheck, User, ArrowRight } from 'lucide-react';
+import { ShieldCheck, User, ArrowRight, ArrowLeft } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
 
 export default function Login() {
@@ -13,6 +13,13 @@ export default function Login() {
    <div className="absolute top-6 right-6 z-20 bg-white/50 dark:bg-white/80 dark:bg-black/50 border border-black/20 dark:border-white/20 p-2">
     <ThemeToggle />
    </div>
+
+   <button 
+    onClick={() => navigate('/')} 
+    className="absolute top-6 left-6 z-20 bg-[#FAF8F5] dark:bg-[#151413] border-[3px] border-[#2C2825] dark:border-[#EFEBE1] p-3 hover:bg-[#EFEBE1] dark:hover:bg-[#2A2621] transition-colors"
+   >
+    <ArrowLeft className="w-6 h-6 text-[#2C2825] dark:text-[#EFEBE1]" />
+   </button>
 
    <div className="relative z-10 w-full max-w-md bg-[#EFEBE1] dark:bg-[#1E1C1A] border-[6px] border-[#2C2825] dark:border-[#EFEBE1] transition-all p-8 md:p-10">
     
@@ -54,6 +61,12 @@ export default function Login() {
         <ArrowRight className="w-6 h-6" />
       </div>
      </button>
+    </div>
+
+    <div className="mt-8 text-center">
+      <button onClick={() => alert('Fitur Lupa Kata Sandi sedang dalam pengembangan.')} className="text-xs font-bold uppercase tracking-widest text-[#6B5A4B] dark:text-[#A89886] hover:text-[#386641] dark:hover:text-[#EFEBE1] transition-colors border-b-2 border-transparent hover:border-[#386641] dark:hover:border-[#EFEBE1] pb-1">
+        Lupa Kata Sandi?
+      </button>
     </div>
    </div>
   </div>

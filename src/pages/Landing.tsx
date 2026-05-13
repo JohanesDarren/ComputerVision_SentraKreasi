@@ -27,7 +27,7 @@ export default function Landing() {
    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 border-b border-slate-900/5 dark:border-white/5 ${scrolled ? 'bg-white/80 dark:bg-[#021811]/80 py-4 shadow-lg' : 'bg-transparent py-5'}`}>
     <div className="max-w-[1200px] mx-auto px-6 flex items-center justify-between">
      <div className="flex items-center gap-2">
-      <img src="/logo.png" alt="Sentra Kreasi Logo" className="h-10 md:h-14 object-contain drop-shadow-sm drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] dark:drop-shadow-sm brightness-110 dark:brightness-200 invert dark:invert-0" />
+      <img src="/logo.png" alt="Sentra Kreasi Logo" className="h-16 md:h-24 w-auto object-contain drop-shadow-md" />
      </div>
 
      <div className="hidden md:flex items-center gap-10 text-sm font-semibold text-slate-600 dark:text-white/70">
@@ -44,12 +44,12 @@ export default function Landing() {
       <button 
        onClick={() => navigate('/login')}
        className="bg-white/90 dark:bg-white/5 shadow-md dark:shadow-none border border-slate-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/10 text-slate-800 dark:text-white px-6 py-2 rounded-full text-sm font-semibold transition-all ">
-       Login
+       Masuk
       </button>
       <button 
        onClick={() => navigate('/presensi-cepat')}
        className="bg-emerald-500 hover:bg-emerald-600 dark:hover:bg-emerald-400 text-slate-900 dark:text-white dark:text-black px-6 py-2 rounded-full text-sm font-bold shadow-[0_4px_20px_rgba(16,185,129,0.3)] dark:shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all">
-       Quick Presence
+       Presensi Cepat
       </button>
      </div>
     </div>
@@ -233,7 +233,7 @@ export default function Landing() {
     {/* FOOTER */}
     <footer className="py-8 border-t border-slate-200 dark:border-white/10">
       <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-sm font-medium text-slate-500 dark:text-slate-400">
-       <img src="/logo.png" alt="Sentra Kreasi Logo" className="h-10 md:h-12 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] dark:drop-shadow-sm brightness-110 dark:brightness-200 opacity-80 invert dark:invert-0" />
+       <img src="/logo.png" alt="Sentra Kreasi Logo" className="h-16 md:h-20 w-auto object-contain drop-shadow-md" />
        <p>&copy; {new Date().getFullYear()} SentraKreasi. Hak cipta dilindungi.</p>
       </div>
     </footer>

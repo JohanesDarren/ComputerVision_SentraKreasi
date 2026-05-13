@@ -90,24 +90,30 @@ export default function History() {
      <p className="text-sm font-medium text-slate-700 dark:text-white/50 mt-2 relative z-10">Catatan dan log waktu kehadiran terpadu.</p>
     </div>
     
-    <div className="flex items-center gap-3">
-     <div className="relative">
-      <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 dark:text-white/40" />
-      <input 
-       type="text" 
-       value={searchQuery}
-       onChange={(e) => setSearchQuery(e.target.value)}
-       placeholder="Cari Status..." 
-       className="pl-12 pr-4 py-3 rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none text-sm focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40 w-full md:w-48 lg:w-64 transition-all shadow-inner"
-      />
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+     <div className="flex flex-col gap-1 w-full sm:w-auto">
+      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-2">Filter berdasarkan Status</span>
+      <div className="relative">
+       <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 dark:text-white/40" />
+       <input 
+        type="text" 
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        placeholder="Cari Status (hadir, pulang...)" 
+        className="pl-12 pr-4 py-3 rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none text-sm focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40 w-full md:w-48 lg:w-64 transition-all shadow-inner"
+       />
+      </div>
      </div>
-     <div className="relative">
-      <input 
-       type="date" 
-       value={dateFilter}
-       onChange={(e) => setDateFilter(e.target.value)}
-       className="px-4 py-3 rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none text-sm focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 text-slate-900 dark:text-white w-full md:w-40 transition-all shadow-inner"
-      />
+     <div className="flex flex-col gap-1 w-full sm:w-auto">
+      <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest pl-2">Filter berdasarkan Tanggal</span>
+      <div className="relative">
+       <input 
+        type="date" 
+        value={dateFilter}
+        onChange={(e) => setDateFilter(e.target.value)}
+        className="px-4 py-3 rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none text-sm focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 text-slate-900 dark:text-white w-full md:w-40 transition-all shadow-inner"
+       />
+      </div>
      </div>
     </div>
    </div>

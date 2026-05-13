@@ -15,6 +15,7 @@ export default function Profile() {
  const webcamRef = useRef<Webcam>(null);
  const fileInputRef = useRef<HTMLInputElement>(null);
  const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
+ const [photoPreview, setPhotoPreview] = useState<string | null>(null);
  const [localInfo, setLocalInfo] = useState({ telp: '', alamat: '' });
 
  useEffect(() => {
@@ -32,9 +33,7 @@ export default function Profile() {
    const reader = new FileReader();
    reader.onload = (event) => {
     const base64 = event.target?.result as string;
-    setProfilePhoto(base64);
-    if (pegawai) localStorage.setItem(`profile_photo_${pegawai.id}`, base64);
-    setShowPhotoModal(false);
+    setPhotoPreview(base64);
    };
    reader.readAsDataURL(file);
   }
@@ -43,11 +42,7 @@ export default function Profile() {
  const capturePhoto = () => {
   const imageSrc = webcamRef.current?.getScreenshot();
   if (imageSrc) {
-   setProfilePhoto(imageSrc);
-   if (pegawai) localStorage.setItem(`profile_photo_${pegawai.id}`, imageSrc);
-   setShowPhotoModal(false);
-   setUseCamera(false);
-   showSnackbar('Foto profil berhasil diubah.');
+   setPhotoPreview(imageSrc);
   }
  };
 
@@ -56,6 +51,22 @@ export default function Profile() {
   if (pegawai) localStorage.removeItem(`profile_photo_${pegawai.id}`);
   setShowPhotoModal(false);
   showSnackbar('Foto profil berhasil dihapus.');
+ };
+
+ const handleSavePhoto = () => {
+  if (photoPreview) {
+   setProfilePhoto(photoPreview);
+   if (pegawai) localStorage.setItem(`profile_photo_${pegawai.id}`, photoPreview);
+   setShowPhotoModal(false);
+   setPhotoPreview(null);
+   setUseCamera(false);
+   showSnackbar('Update Success');
+  }
+ };
+
+ const handleCancelPhoto = () => {
+  setPhotoPreview(null);
+  setUseCamera(false);
  };
 
  const [snackbarMsg, setSnackbarMsg] = useState('');
@@ -252,7 +263,21 @@ export default function Profile() {
       </div>
       
       <div className="p-6">
-       {!useCamera ? (
+       {photoPreview ? (
+        <div className="flex flex-col gap-4">
+         <div className="rounded-2xl overflow-hidden border-2 border-green-500 bg-black aspect-square relative w-48 h-48 mx-auto">
+          <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+         </div>
+         <div className="flex gap-3 mt-4">
+          <button onClick={handleCancelPhoto} className="flex-1 py-3 rounded-full border border-slate-300 dark:border-slate-600 font-semibold text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+           Cancel
+          </button>
+          <button onClick={handleSavePhoto} className="flex-1 py-3 bg-green-500 text-white font-bold text-sm rounded-full hover:bg-green-400 transition-colors">
+           Save Change
+          </button>
+         </div>
+        </div>
+       ) : !useCamera ? (
         <div className="flex flex-col gap-4">
          <input type="file" accept="image/*" ref={fileInputRef} onChange={handlePhotoFile} className="hidden" />
          <button onClick={() => fileInputRef.current?.click()} className="w-full py-4 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-2xl flex flex-col items-center justify-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors">
