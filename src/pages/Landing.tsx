@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, ArrowRight, Play, Camera, MapPin, Instagram, Phone, Mail, MessageCircle, Eye, Activity, ScanFace } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import ThemeToggle from '../components/ThemeToggle';
 
 export default function Landing() {
@@ -58,7 +59,13 @@ export default function Landing() {
    <main className="relative z-10 pt-32 lg:pt-48 pb-20 max-w-[1200px] mx-auto px-6">
     
     {/* HERO SECTION */}
-    <section id="hero" className="relative mb-32 pb-20 flex flex-col items-center text-center">
+    <motion.section 
+      id="hero" 
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className="relative mb-32 pb-20 flex flex-col items-center text-center"
+    >
      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm font-bold mb-8 shadow-sm ">
        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
        AI Biometrics Engine V2.0
@@ -79,10 +86,17 @@ export default function Landing() {
         Mulai Sekarang <ArrowRight className="w-4 h-4" />
        </button>
      </div>
-    </section>
+    </motion.section>
 
     {/* FEATURE SECTION */}
-    <section id="fitur" className="py-20 mb-20 relative">
+    <motion.section 
+      id="fitur" 
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+      className="py-20 mb-20 relative"
+    >
       <div className="text-center mb-16">
        <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900 dark:text-white">Kapabilitas Tanpa Batas</h2>
        <p className="text-slate-600 font-medium dark:text-slate-400 max-w-xl mx-auto">Kami menginvestasikan teknologi canggih untuk mengubah cara Anda berinteraksi dengan manajemen kehadiran.</p>
@@ -120,10 +134,17 @@ export default function Landing() {
          </p>
        </div>
       </div>
-    </section>
+    </motion.section>
 
     {/* OVERVIEW SECTION */}
-    <section className="py-20 mb-20 relative" id="akses">
+    <motion.section 
+      className="py-20 mb-20 relative" 
+      id="akses"
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+    >
      <div className="bg-white/90 dark:bg-white/5 shadow-2xl dark:shadow-none border border-slate-200/60 dark:border-white/10 rounded-[3rem] p-8 md:p-16 relative overflow-hidden">
        <div className="absolute -left-40 top-1/2 -translate-y-1/2 w-80 h-80 bg-cyan-400/20 dark:bg-emerald-500/20 blur-[100px] rounded-full pointer-events-none"></div>
        
@@ -163,10 +184,17 @@ export default function Landing() {
         </div>
        </div>
      </div>
-    </section>
+    </motion.section>
 
     {/* KONTAK SECTION */}
-    <section className="py-20 mb-10 border-t border-slate-200 dark:border-white/10" id="hubungi">
+    <motion.section 
+      className="py-20 mb-10 border-t border-slate-200 dark:border-white/10" 
+      id="hubungi"
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.8, ease: "easeOut" }}
+    >
       <div className="text-center mb-16">
         <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-slate-900 dark:text-white">Hubungi Kami</h2>
         <p className="text-slate-600 font-medium dark:text-slate-400 max-w-xl mx-auto">Kami siap membantu Anda memulai transformasi manajemen instansi.</p>
@@ -228,7 +256,7 @@ export default function Landing() {
           ></iframe>
         </div>
       </div>
-    </section>
+    </motion.section>
 
     {/* FOOTER */}
     <footer className="py-8 border-t border-slate-200 dark:border-white/10">
