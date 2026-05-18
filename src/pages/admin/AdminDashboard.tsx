@@ -283,7 +283,7 @@ export default function AdminDashboard() {
           />
           <Tooltip 
            contentStyle={{ backgroundColor: theme === 'dark' ? '#0f172a' : '#ffffff', border: theme === 'dark' ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(0,0,0,0.1)', borderRadius: '1rem', color: theme === 'dark' ? '#fff' : '#000' }}
-           formatter={(value: any, name: string) => [formatHourTooltip(value as number), name === 'masuk' ? 'Rata-Rata Masuk' : 'Rata-Rata Pulang']}
+           formatter={(value: any, name: string) => [formatHourTooltip(value as number), name]}
            labelFormatter={(label) => `Tanggal ${label} ${format(setMonth(new Date(), selectedMonth), 'MMM')}`}
           />
           <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '12px' }} />

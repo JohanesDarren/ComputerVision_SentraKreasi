@@ -139,7 +139,7 @@ export default function AdminHistory() {
    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4 relative z-10">
     <div className="bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 p-8 rounded-3xl w-full md:w-auto relative overflow-hidden">
      <div className="absolute top-0 right-0 w-32 h-32 bg-green-400/30 dark:bg-green-500/20 blur-3xl rounded-full"></div>
-     <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-white/60 relative z-10">Log Aktivitas (Global)</h1>
+     <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-white/60 relative z-10">Riwayat</h1>
      <p className="text-sm font-medium text-slate-700 dark:text-white/50 mt-2 relative z-10">Pantau seluruh riwayat presensi dari semua pengguna.</p>
     </div>
     

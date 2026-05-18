@@ -108,7 +108,7 @@ export default function Dashboard() {
  };
 
  return (
-  <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8 relative text-slate-900 dark:text-white">
+  <div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8 relative text-slate-900 dark:text-white">
    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
     <div>
      <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-white/60 pb-2">

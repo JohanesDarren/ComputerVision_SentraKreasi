@@ -139,11 +139,11 @@ export default function QuickPresence() {
      <button onClick={() => navigate('/')} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/10 text-sm font-semibold transition-all shadow-sm dark:shadow-none text-slate-800 dark:text-white">
       <ArrowLeft className="w-4 h-4" /> Kembali
      </button>
-     <img src="/logo.png" alt="SentraKreasi" className="h-8 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] dark:drop-shadow-sm brightness-110 dark:brightness-200" />
+     <img src="/logo.png" alt="SentraKreasi" className="h-16 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] dark:drop-shadow-sm brightness-110 dark:brightness-200" />
     </div>
 
     <div className="text-center mb-8">
-     <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-2">Quick Presence</h1>
+     <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-2">Presensi Cepat</h1>
      <p className="text-slate-600 dark:text-slate-400">Arahkan wajah Anda ke kamera untuk melakukan presensi tanpa login.</p>
     </div>
 

@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Model yang digunakan
-EMBEDDING_MODEL = "Facenet512"
+EMBEDDING_MODEL = "ArcFace"
 
 # --- Pre-load model sekali saat startup ---
 # Ini mencegah model dimuat ulang di setiap request (penyebab utama lambat)
@@ -50,34 +50,34 @@ def process_face_image(image_bytes: bytes) -> list:
 
     embedding_objs = None
 
-    # 2. Coba detector opencv (ringan & cepat, ~100ms)
+    # 2. Coba detector yolov8 (sangat akurat dan tahan oklusi seperti hijab/kerudung)
     try:
-        logger.info("Mencoba deteksi wajah dengan opencv...")
+        logger.info("Mencoba deteksi wajah dengan yolov8...")
         embedding_objs = DeepFace.represent(
             img_path=img,
             model_name=EMBEDDING_MODEL,
-            detector_backend="opencv",
+            detector_backend="yolov8",
             enforce_detection=True,
             align=True
         )
     except ValueError as e:
-        logger.warning(f"opencv tidak menemukan wajah: {e}")
+        logger.warning(f"yolov8 tidak menemukan wajah: {e}")
     except Exception as e:
         logger.error(f"Error pada detector opencv: {e}")
 
-    # 3. Fallback ke mtcnn jika opencv gagal (~300ms, lebih akurat untuk sudut wajah)
+    # 3. Fallback ke retinaface jika yolov8 gagal (sangat kuat untuk variasi hijab yang ekstrem)
     if not embedding_objs:
         try:
-            logger.info("opencv gagal, mencoba fallback ke mtcnn...")
+            logger.info("yolov8 gagal, mencoba fallback ke retinaface...")
             embedding_objs = DeepFace.represent(
                 img_path=img,
                 model_name=EMBEDDING_MODEL,
-                detector_backend="mtcnn",
+                detector_backend="retinaface",
                 enforce_detection=True,
                 align=True
             )
         except ValueError as e:
-            logger.warning(f"mtcnn tidak menemukan wajah: {e}")
+            logger.warning(f"retinaface tidak menemukan wajah: {e}")
         except Exception as e:
             logger.error(f"Error pada detector mtcnn: {e}")
 

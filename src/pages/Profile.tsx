@@ -11,6 +11,7 @@ export default function Profile() {
  const [pegawai, setPegawai] = useState<any>(null);
  const [isLoading, setIsLoading] = useState(true);
  const [showPhotoModal, setShowPhotoModal] = useState(false);
+ const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
  const [useCamera, setUseCamera] = useState(false);
  const webcamRef = useRef<Webcam>(null);
  const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,8 +48,13 @@ export default function Profile() {
  };
 
  const handleDeletePhoto = () => {
+  setShowDeleteConfirm(true);
+ };
+
+ const confirmDeletePhoto = () => {
   setProfilePhoto(null);
   if (pegawai) localStorage.removeItem(`profile_photo_${pegawai.id}`);
+  setShowDeleteConfirm(false);
   setShowPhotoModal(false);
   showSnackbar('Foto profil berhasil dihapus.');
  };
@@ -120,7 +126,7 @@ export default function Profile() {
  };
 
  return (
-  <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 text-slate-900 dark:text-white relative">
+  <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 text-slate-900 dark:text-white relative">
    
    {/* Background Glows (more prominent) */}
    <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-green-400/30 dark:bg-green-500/20 rounded-full blur-[120px] pointer-events-none -z-10 mix-blend-screen"></div>
@@ -257,7 +263,7 @@ export default function Profile() {
      <div className="bg-slate-100 dark:bg-slate-800 shadow-xl border border-slate-300 dark:border-slate-700 w-full max-w-md rounded-3xl overflow-hidden animate-in zoom-in-95 duration-200">
       <div className="p-6 border-b border-slate-300 dark:border-slate-700 flex justify-between items-center">
        <h3 className="text-xl font-bold">Ubah Foto Profil</h3>
-       <button onClick={() => { setShowPhotoModal(false); setUseCamera(false); }} className="text-slate-700 dark:text-white/50 hover:text-slate-900 dark:text-white">
+       <button onClick={() => { setShowPhotoModal(false); setUseCamera(false); setShowDeleteConfirm(false); }} className="text-slate-700 dark:text-white/50 hover:text-slate-900 dark:text-white">
         <X className="w-6 h-6" />
        </button>
       </div>
@@ -298,6 +304,22 @@ export default function Profile() {
            <span className="font-semibold">Hapus Foto Profil</span>
           </button>
          )}
+        </div>
+       ) : showDeleteConfirm ? (
+        <div className="flex flex-col gap-4 text-center">
+         <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mb-2">
+          <AlertCircle className="w-8 h-8" />
+         </div>
+         <h4 className="text-lg font-bold text-slate-900 dark:text-white">Hapus Foto Profil?</h4>
+         <p className="text-sm text-slate-600 dark:text-white/60 mb-4">Anda yakin ingin menghapus foto profil? Tindakan ini tidak dapat dibatalkan.</p>
+         <div className="flex gap-3">
+          <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-3 rounded-full border border-slate-300 dark:border-slate-600 font-semibold text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+           Batal
+          </button>
+          <button onClick={confirmDeletePhoto} className="flex-1 py-3 bg-red-500 text-white font-bold text-sm rounded-full hover:bg-red-600 transition-colors">
+           Ya, Hapus
+          </button>
+         </div>
         </div>
        ) : (
         <div className="space-y-4">

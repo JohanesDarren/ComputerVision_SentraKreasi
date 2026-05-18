@@ -110,8 +110,13 @@ export default function Auth() {
    
    setStatusMsg({ type: 'info', text: 'Data disimpan. 2/2 Memproses wajah...' });
 
-   const images = [capturedImages.depan, capturedImages.kiri, capturedImages.kanan];
-   await registerFace(insertedData.id, images);
+   try {
+     const images = [capturedImages.depan, capturedImages.kiri, capturedImages.kanan];
+     await registerFace(insertedData.id, images);
+   } catch (faceErr: any) {
+     await supabase.from('pegawai').delete().eq('id', insertedData.id);
+     throw new Error(faceErr.message || 'Pendaftaran wajah gagal. Data dibatalkan.');
+   }
    
    setStatusMsg({ type: 'success', text: `Berhasil! Akun dan Wajah telah didaftarkan.` });
    
@@ -139,23 +144,24 @@ export default function Auth() {
      <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-cyan-400/30 dark:bg-cyan-900/40 rounded-full blur-[100px] mix-blend-screen"></div>
    </div>
 
+   <button type="button" onClick={() => navigate('/')} className="absolute top-6 left-6 z-50 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-1 text-sm font-semibold">
+    <ArrowRight className="w-4 h-4 rotate-180" /> Kembali
+   </button>
+
    <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center">
     <img onClick={() => navigate('/')} src="/logo.png" alt="SentraKreasi" className="h-12 w-auto object-contain brightness-200 opacity-80 hover:opacity-100 transition-opacity cursor-pointer mb-10" />
     
     <div className="flex bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-full mb-10 w-full max-w-md p-1 ">
-     <button onClick={() => setMode('login')} className={`flex-1 py-3 px-6 rounded-full text-sm font-semibold transition-all ${mode === 'login' ? 'bg-green-500 text-white dark:text-black dark:text-black shadow-[0_0_20px_rgba(34,197,94,0.3)]' : 'text-slate-700 dark:text-white/60 hover:text-white'}`}>
+     <button onClick={() => setMode('login')} className={`flex-1 py-3 px-6 rounded-full text-sm font-semibold transition-all ${mode === 'login' ? 'bg-green-500 text-white dark:text-black shadow-[0_0_20px_rgba(34,197,94,0.3)]' : 'text-slate-700 dark:text-white/60 hover:text-slate-900 dark:hover:text-white'}`}>
       Masuk (Login)
      </button>
-     <button onClick={() => setMode('register')} className={`flex-1 py-3 px-6 rounded-full text-sm font-semibold transition-all ${mode === 'register' ? 'bg-green-500 text-white dark:text-black dark:text-black shadow-[0_0_20px_rgba(34,197,94,0.3)]' : 'text-slate-700 dark:text-white/60 hover:text-white'}`}>
+     <button onClick={() => setMode('register')} className={`flex-1 py-3 px-6 rounded-full text-sm font-semibold transition-all ${mode === 'register' ? 'bg-green-500 text-white dark:text-black shadow-[0_0_20px_rgba(34,197,94,0.3)]' : 'text-slate-700 dark:text-white/60 hover:text-slate-900 dark:hover:text-white'}`}>
       Daftar Baru
      </button>
     </div>
 
     {mode === 'login' ? (
      <form onSubmit={handleLogin} className="w-full max-w-md bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 p-8 md:p-10 rounded-3xl shadow-2xl relative">
-       <button type="button" onClick={() => navigate('/')} className="absolute top-6 left-6 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-1 text-xs font-semibold">
-        <ArrowRight className="w-3 h-3 rotate-180" /> Kembali
-       </button>
        <div className="text-center mb-8 mt-4">
         <h2 className="text-3xl font-bold tracking-tight mb-2">Selamat Datang</h2>
         <p className="text-sm text-slate-700 dark:text-white/50">Masukkan kredensial untuk mengakses sistem.</p>

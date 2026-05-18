@@ -1,4 +1,4 @@
-import { Calendar, Search, Filter, Smile, Target, BatteryMedium, Meh, Loader2 } from 'lucide-react';
+import { Calendar, Search, Filter, Smile, Target, BatteryMedium, Meh, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { format } from 'date-fns';
@@ -9,7 +9,8 @@ export default function History() {
  const [isLoading, setIsLoading] = useState(true);
  const [searchQuery, setSearchQuery] = useState('');
  const [dateFilter, setDateFilter] = useState('');
- const [limit, setLimit] = useState(20);
+ const [currentPage, setCurrentPage] = useState(1);
+ const itemsPerPage = 10;
 
  useEffect(() => {
   async function fetchHistory() {
@@ -75,10 +76,11 @@ export default function History() {
   return matchStatus && matchDate;
  });
 
- const displayData = filteredData.slice(0, limit);
+ const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+ const displayData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
  return (
-  <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8 text-slate-900 dark:text-white relative">
+  <div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8 text-slate-900 dark:text-white relative">
    
    {/* Background Glows */}
    <div className="absolute top-1/4 left-0 w-[400px] h-[400px] bg-green-400/30 dark:bg-green-500/20 rounded-full blur-[150px] pointer-events-none -z-10 mix-blend-screen"></div>
@@ -121,15 +123,6 @@ export default function History() {
    <div className="bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-3xl overflow-hidden flex flex-col transition-colors relative z-10">
     <div className="p-6 border-b border-slate-300 dark:border-slate-700 bg-white/5 flex justify-between items-center">
       <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Log Area Pindai</h3>
-      <select 
-        value={limit} 
-        onChange={(e) => setLimit(Number(e.target.value))}
-        className="px-3 py-1.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:border-green-500/50 transition-colors"
-      >
-        <option value={10}>10 Entri</option>
-        <option value={20}>20 Entri</option>
-        <option value={50}>50 Entri</option>
-      </select>
     </div>
     <div className="overflow-x-auto">
      <table className="w-full text-left border-collapse min-w-[700px]">
@@ -205,7 +198,26 @@ export default function History() {
     </div>
     
     <div className="p-5 bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none border-t border-slate-300 dark:border-slate-700 flex items-center justify-between">
-     <span className="text-xs font-medium text-slate-700 dark:text-white/40">Menampilkan {displayData.length} entri terakhir</span>
+     <span className="text-xs font-medium text-slate-700 dark:text-white/40">Menampilkan {displayData.length} dari {filteredData.length} entri</span>
+     <div className="flex gap-2">
+      <button 
+        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+        disabled={currentPage === 1}
+        className="p-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 disabled:opacity-50 hover:bg-slate-200 dark:hover:bg-slate-700"
+      >
+        <ChevronLeft className="w-4 h-4" />
+      </button>
+      <span className="px-3 py-2 text-sm font-medium border border-slate-300 dark:border-slate-700 rounded-lg">
+        {currentPage} / {Math.max(1, totalPages)}
+      </span>
+      <button 
+        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+        disabled={currentPage === totalPages || totalPages === 0}
+        className="p-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 disabled:opacity-50 hover:bg-slate-200 dark:hover:bg-slate-700"
+      >
+        <ChevronRight className="w-4 h-4" />
+      </button>
+     </div>
     </div>
    </div>
   </div>
