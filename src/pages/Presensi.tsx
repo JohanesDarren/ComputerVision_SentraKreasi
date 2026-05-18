@@ -123,88 +123,89 @@ export default function Presensi() {
   }
  }, []);
 
- return (
-  <div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 text-slate-900 dark:text-white">
-   <div className="mb-4 bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-3xl p-8 ">
-    <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-white/60">Quick Presence</h1>
-    <p className="text-sm font-medium text-slate-700 dark:text-white/50 mt-2">Arahkan wajah ke kamera untuk melakukan presensi cepat.</p>
-   </div>
-
-   <div className="relative overflow-hidden bg-black border border-slate-300 dark:border-slate-700 rounded-[2.5rem] aspect-[4/3] md:aspect-[16/9] isolate flex items-center justify-center shadow-2xl">
-    <Webcam
-     disablePictureInPicture
-     audio={false}
-     ref={webcamRef}
-     screenshotFormat="image/jpeg"
-     className="object-cover w-full h-full absolute inset-0 -z-10"
-     videoConstraints={{ facingMode: "user" }}
-    />
-
-    <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none flex-col">
-     <div className="relative flex items-center justify-center">
-      
-      <div className="absolute w-[280px] h-[280px] md:w-[360px] md:h-[360px] border border-green-500/30 rounded-full flex items-center justify-center">
-        <div className="w-full h-full absolute rounded-full border border-green-500/10 scale-125 animate-pulse"></div>
-      </div>
-
-      <div className="relative w-56 h-56 md:w-72 md:h-72 border-2 border-green-500/50 rounded-3xl bg-green-500/5 flex flex-col justify-between p-2 shadow-[inset_0_0_50px_rgba(34,197,94,0.1)]">
-       <div className="flex justify-between">
-        <div className="w-8 h-8 border-t-4 border-l-4 rounded-tl-xl border-green-500"></div>
-        <div className="w-8 h-8 border-t-4 border-r-4 rounded-tr-xl border-green-500"></div>
-       </div>
-       
-       {isScanning && (
-        <div className="absolute top-0 left-0 right-0 h-1 bg-green-500 animate-[scanline_2s_ease-in-out_infinite] flex justify-center shadow-[0_0_20px_rgba(34,197,94,1)]"></div>
-       )}
-       
-       {!isScanning && !scanResult && (
-         <div className="self-center flex items-center gap-2 bg-white/80 dark:bg-black/50 px-4 py-2 text-xs font-semibold text-green-400 rounded-full border border-green-500/30">
-          <ScanLine className="w-4 h-4" /> Area Pindai Wajah
-         </div>
-       )}
-       {isScanning && (
-         <div className="self-center flex items-center gap-2 bg-green-500 px-4 py-2 text-xs font-semibold text-slate-900 dark:text-white dark:text-black rounded-full shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-pulse">
-          <RefreshCw className="w-4 h-4 animate-spin" /> Menganalisis...
-         </div>
-       )}
-
-       <div className="flex justify-between mt-auto">
-        <div className="w-8 h-8 border-b-4 border-l-4 rounded-bl-xl border-green-500"></div>
-        <div className="w-8 h-8 border-b-4 border-r-4 rounded-br-xl border-green-500"></div>
-       </div>
-      </div>
-     </div>
+  return (
+   <div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 text-slate-900 dark:text-white">
+    <div className="mb-2 bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-3xl p-6 md:p-8 max-w-[1200px] mx-auto w-full">
+     <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-white/60">Presensi Cepat</h1>
+     <p className="text-sm font-medium text-slate-700 dark:text-white/50 mt-1.5">Arahkan wajah ke kamera untuk melakukan presensi cepat secara instan.</p>
     </div>
 
-    <div className="absolute bottom-6 inset-x-0 z-30 px-6 md:px-8 flex flex-col justify-end gap-4 md:flex-row md:justify-between md:items-end">
-     <div className="bg-white/70 dark:bg-black/60 p-4 rounded-2xl border border-slate-300 dark:border-slate-700 max-w-[200px]">
-      <p className="text-slate-700 dark:text-white/50 text-xs font-medium mb-1">Sensor Biometrik</p>
-      <h2 className="text-slate-900 dark:text-white font-bold text-lg flex items-center gap-2">
-       <span className="w-2.5 h-2.5 bg-green-500 rounded-full shadow-[0_0_10px_rgba(34,197,94,0.8)] animate-pulse"></span>Kamera Aktif
-      </h2>
+    <div className="relative overflow-hidden bg-black border border-slate-300 dark:border-slate-700 rounded-[2rem] aspect-[4/3] md:aspect-video w-full max-w-[1200px] mx-auto isolate flex items-center justify-center shadow-2xl">
+     <Webcam
+      disablePictureInPicture
+      audio={false}
+      ref={webcamRef}
+      screenshotFormat="image/jpeg"
+      className="object-cover w-full h-full absolute inset-0 -z-10"
+      videoConstraints={{ facingMode: "user" }}
+     />
+
+     <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none flex-col">
+      <div className="relative flex items-center justify-center">
+       
+       <div className="absolute w-[240px] h-[240px] md:w-[320px] md:h-[320px] border border-green-500/30 rounded-full flex items-center justify-center">
+         <div className="w-full h-full absolute rounded-full border border-green-500/10 scale-125 animate-pulse"></div>
+       </div>
+
+       <div className="relative w-48 h-48 md:w-64 md:h-64 border-2 border-green-500/50 rounded-2xl bg-green-500/5 flex flex-col justify-between p-2.5 shadow-[inset_0_0_30px_rgba(34,197,94,0.15)]">
+        <div className="flex justify-between">
+         <div className="w-8 h-8 border-t-4 border-l-4 rounded-tl-xl border-green-500"></div>
+         <div className="w-8 h-8 border-t-4 border-r-4 rounded-tr-xl border-green-500"></div>
+        </div>
+        
+        {isScanning && (
+         <div className="absolute top-0 left-0 right-0 h-1 bg-green-500 animate-[scanline_2s_ease-in-out_infinite] flex justify-center shadow-[0_0_20px_rgba(34,197,94,1)]"></div>
+        )}
+        
+        {!isScanning && !scanResult && (
+          <div className="self-center flex items-center gap-1.5 bg-white/80 dark:bg-black/50 px-3 py-1.5 text-[10px] font-semibold text-green-400 rounded-full border border-green-500/30">
+           <ScanLine className="w-3.5 h-3.5" /> Area Pindai Wajah
+          </div>
+        )}
+        {isScanning && (
+          <div className="self-center flex items-center gap-1.5 bg-green-500 px-3 py-1.5 text-[10px] font-semibold text-slate-900 dark:text-white dark:text-black rounded-full shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-pulse">
+           <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Menganalisis...
+          </div>
+        )}
+
+        <div className="flex justify-between mt-auto">
+         <div className="w-8 h-8 border-b-4 border-l-4 rounded-bl-xl border-green-500"></div>
+         <div className="w-8 h-8 border-b-4 border-r-4 rounded-br-xl border-green-500"></div>
+        </div>
+       </div>
+      </div>
      </div>
-     <button
-      onClick={handleCapture}
-      disabled={isScanning || scanResult === 'success'}
-      className={cn(
-       "flex items-center justify-center gap-3 px-8 py-4 rounded-full font-bold transition-all",
-       isScanning 
-        ? "bg-slate-200 dark:bg-slate-700 shadow-sm dark:shadow-none text-slate-700 dark:text-white/40 cursor-not-allowed border border-white/5" 
-        : "bg-green-500 text-white dark:text-black dark:text-black hover:bg-green-400 shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:shadow-[0_0_30px_rgba(34,197,94,0.5)]"
-      )}
-     >
-      {isScanning ? (
-       <>
-        <RefreshCw className="w-5 h-5 animate-spin" />
-        <span>Memproses...</span>
-       </>
-      ) : (
-       <>
-        <Camera className="w-5 h-5" />
-        <span>Pindai Wajah Sekarang</span>
-       </>
-      )}
-     </button>
+
+     <div className="absolute bottom-6 inset-x-0 z-30 px-6 md:px-8 flex flex-col justify-end gap-4 md:flex-row md:justify-between md:items-end">
+      <div className="bg-white/85 dark:bg-black/75 p-3.5 rounded-2xl border border-slate-300 dark:border-slate-700 max-w-[200px] shadow-lg backdrop-blur-md">
+       <p className="text-slate-700 dark:text-white/50 text-xs font-semibold mb-1">Sensor Biometrik</p>
+       <h2 className="text-slate-900 dark:text-white font-extrabold text-base flex items-center gap-2">
+        <span className="w-2.5 h-2.5 bg-green-500 rounded-full shadow-[0_0_12px_rgba(34,197,94,0.9)] animate-pulse"></span>Kamera Aktif
+       </h2>
+      </div>
+      <button
+       onClick={handleCapture}
+       disabled={isScanning || scanResult === 'success'}
+       className={cn(
+        "flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-full font-extrabold text-sm transition-all shadow-lg",
+        isScanning 
+         ? "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-white/40 cursor-not-allowed border border-white/5" 
+         : "bg-green-500 text-white dark:text-black hover:bg-green-400 shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:shadow-[0_0_30px_rgba(34,197,94,0.6)]"
+       )}
+      >
+       {isScanning ? (
+        <>
+         <RefreshCw className="w-5 h-5 animate-spin" />
+         <span>Memproses Sidik Wajah...</span>
+        </>
+       ) : (
+        <>
+         <Camera className="w-5 h-5" />
+         <span>Pindai Wajah Sekarang</span>
+        </>
+       )}
+      </button>
+     </div>
     </div>
 
     <AnimatePresence>
@@ -213,15 +214,15 @@ export default function Presensi() {
        initial={{ opacity: 0, scale: 0.95, y: 10 }}
        animate={{ opacity: 1, scale: 1, y: 0 }}
        exit={{ opacity: 0, scale: 0.95, y: -10 }}
-       className="absolute top-6 left-6 right-6 z-30 flex justify-center"
+       className="absolute top-4 left-4 right-4 z-30 flex justify-center"
       >
-       <div className="bg-green-400/20 dark:bg-green-500/10 border border-green-500/30 rounded-3xl p-5 md:p-6 flex items-center gap-5 text-left w-full max-w-md shadow-2xl">
-        <div className="w-14 h-14 bg-green-500 text-white dark:text-black dark:text-black rounded-2xl flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(34,197,94,0.4)]">
-          <Smile className="w-7 h-7" />
+       <div className="bg-green-400/20 dark:bg-green-500/10 border border-green-500/30 rounded-2xl p-4 flex items-center gap-4 text-left w-full max-w-sm shadow-2xl">
+        <div className="w-10 h-10 bg-green-500 text-white dark:text-black rounded-xl flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(34,197,94,0.4)]">
+          <Smile className="w-5 h-5" />
         </div>
         <div>
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white">Presensi {pegawaiData.statusMessage}</h3>
-          <p className="text-sm font-medium text-slate-700 dark:text-white/70 mt-1">
+          <h3 className="text-base font-bold text-slate-900 dark:text-white">Presensi {pegawaiData.statusMessage}</h3>
+          <p className="text-xs font-medium text-slate-700 dark:text-white/70 mt-0.5">
            Selamat Datang, <span className="text-green-400 font-semibold">{pegawaiData.nama}</span>.<br/> NIP: {pegawaiData.nip}
           </p>
         </div>
@@ -234,15 +235,15 @@ export default function Presensi() {
        initial={{ opacity: 0, scale: 0.95, y: 10 }}
        animate={{ opacity: 1, scale: 1, y: 0 }}
        exit={{ opacity: 0, scale: 0.95, y: -10 }}
-       className="absolute top-6 left-6 right-6 z-30 flex justify-center"
+       className="absolute top-4 left-4 right-4 z-30 flex justify-center"
       >
-       <div className="bg-red-500/10 border border-red-500/30 rounded-3xl p-5 md:p-6 flex items-center gap-5 text-left w-full max-w-md shadow-2xl">
-        <div className="w-14 h-14 bg-red-500 text-white dark:text-black rounded-2xl flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(239,68,68,0.4)]">
-          <Frown className="w-7 h-7" />
+       <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 flex items-center gap-4 text-left w-full max-w-sm shadow-2xl">
+        <div className="w-10 h-10 bg-red-500 text-white rounded-xl flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(239,68,68,0.4)]">
+          <Frown className="w-5 h-5" />
         </div>
         <div>
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white">Presensi Gagal</h3>
-          <p className="text-sm font-medium text-red-400 mt-1">
+          <h3 className="text-base font-bold text-slate-900 dark:text-white">Presensi Gagal</h3>
+          <p className="text-xs font-medium text-red-400 mt-0.5">
            {errorMessage}
           </p>
         </div>
@@ -250,15 +251,14 @@ export default function Presensi() {
       </motion.div>
      )}
     </AnimatePresence>
-   </div>
    
-   <div className="bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-3xl p-6 flex items-center gap-6 overflow-x-auto ">
-    <div className="px-4 border-r border-slate-300 dark:border-slate-700 whitespace-nowrap">
-     <p className="text-xs font-medium text-slate-700 dark:text-white/50 mb-1">Akurasi AI</p>
-     <p className="text-2xl font-bold text-green-400">99.8%</p>
+    <div className="bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-3xl p-6 flex items-center gap-6 overflow-x-auto max-w-[1200px] mx-auto w-full shadow-lg">
+    <div className="px-5 border-r border-slate-300 dark:border-slate-700 whitespace-nowrap">
+     <p className="text-xs font-semibold text-slate-700 dark:text-white/50 mb-1">Akurasi AI</p>
+     <p className="text-2xl font-black text-green-400">99.8%</p>
     </div>
-    <div className="flex-1 bg-white/60 dark:bg-black/30 border border-slate-300 dark:border-slate-700 rounded-2xl flex items-center px-5 py-4 min-w-[250px]">
-     <p className="text-slate-700 dark:text-white/70 text-sm font-medium truncate flex items-center gap-3">
+    <div className="flex-1 bg-white/60 dark:bg-black/30 border border-slate-300 dark:border-slate-700 rounded-2xl flex items-center px-6 py-4 min-w-[220px]">
+     <p className="text-slate-700 dark:text-white/80 text-sm font-semibold truncate flex items-center gap-2.5">
        <ScanFace className="w-5 h-5 text-green-400" />
       {scanResult === 'success' && pegawaiData 
        ? `"Ananda ${pegawaiData.nama.split(' ')[0]} baru saja melakukan presensi."`

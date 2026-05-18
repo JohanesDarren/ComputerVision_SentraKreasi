@@ -77,7 +77,7 @@ import { registerFace } from '../lib/api';
  };
 
  return (
-  <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8">
+  <div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full">
    <div className="bg-[#FAF8F5] dark:bg-[#2A2621] border-[4px] border-[#2C2825] dark:border-[#EFEBE1] p-6 mb-6 relative">
     <button 
      onClick={() => navigate('/')} 

@@ -22,9 +22,9 @@ export default function AppLayout() {
      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-cyan-400/30 dark:bg-cyan-900/40 rounded-full blur-[120px] mix-blend-screen"></div>
    </div>
 
-   <div className="relative z-10 flex h-full w-full p-4 md:p-6 gap-6">
+   <div className="relative z-10 flex h-screen w-full overflow-hidden">
     {/* Sidebar Desktop */}
-    <aside className="hidden md:flex flex-col w-[240px] py-8 px-4 items-center rounded-[2rem] bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 h-full justify-between shrink-0 transition-all shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+    <aside className="hidden md:flex flex-col w-[280px] py-8 px-5 items-center rounded-none bg-slate-100 dark:bg-slate-800 shadow-sm border-r border-slate-300 dark:border-slate-700 h-full justify-between shrink-0 transition-all">
      <div className="flex flex-col items-center gap-8 w-full">
       <div className="flex items-center justify-center">
        <img src="/logo.png" alt="SentraKreasi" className="h-20 w-auto object-contain drop-shadow-sm" />
@@ -87,14 +87,14 @@ export default function AppLayout() {
       </header>
 
       {/* Desktop Header */}
-      <header className="hidden md:flex items-center justify-between p-6 bg-slate-100/80 dark:bg-slate-800/80 backdrop-blur-md rounded-2xl shadow-sm border border-slate-300 dark:border-slate-700 mb-6 z-20">
+      <header className="hidden md:flex items-center justify-between px-8 py-5 bg-white/50 dark:bg-black/20 backdrop-blur-md border-b border-slate-300 dark:border-slate-800 z-20">
         <h2 className="text-xl font-bold text-slate-800 dark:text-white">Portal Pegawai Sentra Kreasi</h2>
         <div className="flex items-center gap-4 text-sm font-medium text-slate-600 dark:text-slate-300">
           <span>Area Kerja Terpadu</span>
         </div>
       </header>
 
-      <div className="flex-1 overflow-auto pb-28 md:pb-0 z-10 custom-scrollbar rounded-[2rem] bg-transparent flex flex-col">
+      <div className="flex-1 overflow-auto p-6 md:p-10 pb-28 md:pb-10 z-10 custom-scrollbar bg-transparent flex flex-col">
        <Outlet />
        {/* Desktop Footer */}
        <footer className="hidden md:block mt-8 py-4 text-center text-sm text-slate-500 border-t border-slate-300 dark:border-slate-700">

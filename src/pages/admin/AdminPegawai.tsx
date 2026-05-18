@@ -30,35 +30,35 @@ export default function AdminPegawai() {
  );
 
  return (
-  <div className="w-full max-w-none mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 h-full p-4 md:p-8 text-slate-900 dark:text-white relative">
+  <div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 text-slate-900 dark:text-white relative">
    <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-green-400/20 dark:bg-green-500/10 rounded-full blur-[150px] pointer-events-none -z-10 mix-blend-screen"></div>
 
    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-    <div className="bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 p-8 rounded-3xl w-full md:w-auto relative overflow-hidden">
+    <div className="bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 p-5 rounded-2xl w-full md:w-auto relative overflow-hidden">
      <div className="absolute top-0 right-0 w-32 h-32 bg-green-400/30 dark:bg-green-500/20 blur-3xl rounded-full"></div>
-     <h1 className="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-white/60">Data Pegawai</h1>
-     <p className="text-sm font-medium text-slate-700 dark:text-white/50 mt-2">Kelola informasi dan biometrik karyawan.</p>
+     <h1 className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-white/60">Data Pegawai</h1>
+     <p className="text-xs font-medium text-slate-700 dark:text-white/50 mt-1">Kelola informasi dan biometrik karyawan.</p>
     </div>
     
     <div className="flex items-center gap-3">
      <div className="relative">
-      <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 dark:text-white/40" />
+      <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 dark:text-white/40" />
       <input 
        type="text" 
        value={searchQuery}
        onChange={(e) => setSearchQuery(e.target.value)}
        placeholder="Cari NIP / Nama..." 
-       className="pl-12 pr-4 py-3 rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none text-sm focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40 w-full md:w-48 lg:w-64 transition-all shadow-inner"
+       className="pl-10 pr-4 py-2 rounded-full border border-slate-300 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shadow-sm dark:shadow-none text-xs focus:outline-none focus:border-green-500/50 focus:ring-1 focus:ring-green-500/50 text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-white/40 w-full md:w-48 lg:w-64 transition-all shadow-inner"
       />
      </div>
     </div>
    </div>
 
-   <div className="bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-3xl overflow-hidden flex flex-col transition-colors ">
-    <div className="p-6 border-b border-slate-300 dark:border-slate-700 bg-white/5">
-      <h3 className="text-lg font-semibold text-slate-900 dark:text-white">Daftar Pegawai Aktif</h3>
+   <div className="bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-2xl overflow-hidden flex flex-col transition-colors ">
+    <div className="p-4 border-b border-slate-300 dark:border-slate-700 bg-white/5">
+      <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Daftar Pegawai Aktif</h3>
     </div>
-    <div className="overflow-auto max-h-[60vh] custom-scrollbar">
+    <div className="overflow-auto max-h-[45vh] custom-scrollbar">
      <table className="w-full text-left border-collapse min-w-[800px]">
       <thead className="sticky top-0 z-10 bg-slate-100 dark:bg-slate-800">
        <tr className="border-b border-slate-300 dark:border-slate-700 bg-black/20">
