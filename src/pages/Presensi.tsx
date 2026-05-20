@@ -214,7 +214,7 @@ export default function Presensi() {
        initial={{ opacity: 0, scale: 0.95, y: 10 }}
        animate={{ opacity: 1, scale: 1, y: 0 }}
        exit={{ opacity: 0, scale: 0.95, y: -10 }}
-       className="absolute top-4 left-4 right-4 z-30 flex justify-center"
+       className="fixed top-24 left-0 right-0 z-[100] flex justify-center pointer-events-none"
       >
        <div className="bg-green-400/20 dark:bg-green-500/10 border border-green-500/30 rounded-2xl p-4 flex items-center gap-4 text-left w-full max-w-sm shadow-2xl">
         <div className="w-10 h-10 bg-green-500 text-white dark:text-black rounded-xl flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(34,197,94,0.4)]">
@@ -235,7 +235,7 @@ export default function Presensi() {
        initial={{ opacity: 0, scale: 0.95, y: 10 }}
        animate={{ opacity: 1, scale: 1, y: 0 }}
        exit={{ opacity: 0, scale: 0.95, y: -10 }}
-       className="absolute top-4 left-4 right-4 z-30 flex justify-center"
+       className="fixed top-24 left-0 right-0 z-[100] flex justify-center pointer-events-none"
       >
        <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 flex items-center gap-4 text-left w-full max-w-sm shadow-2xl">
         <div className="w-10 h-10 bg-red-500 text-white rounded-xl flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(239,68,68,0.4)]">

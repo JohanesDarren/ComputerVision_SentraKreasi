@@ -268,7 +268,23 @@ export default function Profile() {
       </div>
       
       <div className="p-6">
-       {photoPreview ? (
+       {showDeleteConfirm ? (
+        <div className="flex flex-col gap-4 text-center">
+         <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mb-2">
+          <AlertCircle className="w-8 h-8" />
+         </div>
+         <h4 className="text-lg font-bold text-slate-900 dark:text-white">Hapus Foto Profil?</h4>
+         <p className="text-sm text-slate-600 dark:text-white/60 mb-4">Anda yakin ingin menghapus foto profil? Tindakan ini tidak dapat dibatalkan.</p>
+         <div className="flex gap-3">
+          <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-3 rounded-full border border-slate-300 dark:border-slate-600 font-semibold text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+           Batal
+          </button>
+          <button onClick={confirmDeletePhoto} className="flex-1 py-3 bg-red-500 text-white font-bold text-sm rounded-full hover:bg-red-600 transition-colors">
+           Ya, Hapus
+          </button>
+         </div>
+        </div>
+       ) : photoPreview ? (
         <div className="flex flex-col gap-4">
          <div className="rounded-2xl overflow-hidden border-2 border-green-500 bg-black aspect-square relative w-48 h-48 mx-auto">
           <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
@@ -303,22 +319,6 @@ export default function Profile() {
            <span className="font-semibold">Hapus Foto Profil</span>
           </button>
          )}
-        </div>
-       ) : showDeleteConfirm ? (
-        <div className="flex flex-col gap-4 text-center">
-         <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-500/20 text-red-500 rounded-full flex items-center justify-center mb-2">
-          <AlertCircle className="w-8 h-8" />
-         </div>
-         <h4 className="text-lg font-bold text-slate-900 dark:text-white">Hapus Foto Profil?</h4>
-         <p className="text-sm text-slate-600 dark:text-white/60 mb-4">Anda yakin ingin menghapus foto profil? Tindakan ini tidak dapat dibatalkan.</p>
-         <div className="flex gap-3">
-          <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-3 rounded-full border border-slate-300 dark:border-slate-600 font-semibold text-sm hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-           Batal
-          </button>
-          <button onClick={confirmDeletePhoto} className="flex-1 py-3 bg-red-500 text-white font-bold text-sm rounded-full hover:bg-red-600 transition-colors">
-           Ya, Hapus
-          </button>
-         </div>
         </div>
        ) : (
         <div className="space-y-4">

@@ -223,7 +223,7 @@ export default function QuickPresence() {
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: -10 }}
-        className="absolute top-6 left-6 right-6 z-30 flex justify-center"
+        className="fixed top-24 left-0 right-0 z-[100] flex justify-center pointer-events-none"
        >
         <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-3xl p-5 md:p-6 flex items-center gap-5 text-left w-full max-w-md shadow-2xl">
          <div className="w-14 h-14 bg-emerald-500 text-white dark:text-black rounded-2xl flex items-center justify-center shrink-0 shadow-[0_4px_20px_rgba(16,185,129,0.4)] dark:shadow-[0_0_20px_rgba(16,185,129,0.4)]">
@@ -244,7 +244,7 @@ export default function QuickPresence() {
         initial={{ opacity: 0, scale: 0.95, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: -10 }}
-        className="absolute top-6 left-6 right-6 z-30 flex justify-center"
+        className="fixed top-24 left-0 right-0 z-[100] flex justify-center pointer-events-none"
        >
         <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-3xl p-5 md:p-6 flex items-center gap-5 text-left w-full max-w-md shadow-2xl">
          <div className="w-14 h-14 bg-red-500 text-white dark:text-black rounded-2xl flex items-center justify-center shrink-0 shadow-[0_4px_20px_rgba(239,68,68,0.4)] dark:shadow-[0_0_20px_rgba(239,68,68,0.4)]">
