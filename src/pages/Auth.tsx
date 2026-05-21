@@ -31,8 +31,14 @@ export default function Auth() {
   setStatusMsg({ type: 'info', text: 'Mencoba masuk...' });
   
   try {
-   if (loginEmail === 'admin@sentrakreasi.com' && loginPassword === 'sentrakreasi123') {
-    setStatusMsg({ type: 'success', text: 'Login Admin Berhasil!' });
+   const normalizedLogin = loginEmail.trim().toLowerCase();
+   const isAdminLogin = (
+    ((normalizedLogin === 'superadmin@sentrakreasi.com' || normalizedLogin === 'sentra admin') && loginPassword === 'adminsentrakreasi') ||
+    (normalizedLogin === 'admin@sentrakreasi.com' && loginPassword === 'sentrakreasi123')
+   );
+
+   if (isAdminLogin) {
+    setStatusMsg({ type: 'success', text: 'Login Administrator Berhasil!' });
     setTimeout(() => navigate('/admin'), 1000);
    } else {
     // Mengecek email DAN password di tabel pegawai
@@ -198,7 +204,7 @@ export default function Auth() {
        </button>
      </form>
     ) : (
-     <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
+     <form onSubmit={handleRegister} className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
       <div className="space-y-6">
        <div className="bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-3xl p-8 space-y-5">
         <h3 className="text-xl font-bold mb-6">Data Diri Pribadi</h3>
@@ -274,7 +280,7 @@ export default function Auth() {
          )}
 
          <button 
-          onClick={handleRegister}
+          type="submit"
           disabled={isProcessing || !capturedImages.depan || !capturedImages.kiri || !capturedImages.kanan}
           className="w-full mt-6 p-4 bg-green-500 text-white dark:text-black dark:text-black rounded-full text-sm font-bold flex items-center justify-center gap-2 hover:bg-green-400 shadow-[0_0_20px_rgba(34,197,94,0.3)] hover:shadow-[0_0_30px_rgba(34,197,94,0.5)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
          >
@@ -282,7 +288,7 @@ export default function Auth() {
          </button>
        </div>
       </div>
-     </div>
+     </form>
     )}
 
    </div>
