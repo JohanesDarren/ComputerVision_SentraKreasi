@@ -113,19 +113,18 @@ export default function Landing() {
          </p>
        </div>
 
-       <div className="bg-gradient-to-b from-blue-50/80 to-white/80 dark:from-emerald-500/10 dark:to-transparent border border-blue-200 dark:border-emerald-500/20 p-8 rounded-3xl hover:border-blue-300 dark:hover:border-emerald-500/40 shadow-sm dark:shadow-none transition-all group relative overflow-hidden">
-         <div className="absolute top-0 right-0 w-32 h-32 bg-blue-200/50 dark:bg-emerald-500/20 blur-3xl -z-10 group-hover:bg-blue-300/50 dark:group-hover:bg-emerald-500/30 transition-all"></div>
-         <div className="w-14 h-14 bg-emerald-500 text-slate-900 dark:text-white dark:text-black rounded-2xl flex items-center justify-center mb-8 shadow-[0_4px_20px_rgba(16,185,129,0.4)] dark:shadow-[0_0_20px_rgba(16,185,129,0.4)] group-hover:scale-110 transition-transform">
+       <div className="bg-white/80 dark:bg-white/5 shadow-sm dark:shadow-none border border-slate-200/60 dark:border-white/10 p-8 rounded-3xl hover:bg-white dark:hover:bg-white/10 transition-all group">
+         <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mb-8 border border-emerald-200 dark:border-emerald-500/30 group-hover:scale-110 transition-transform shadow-sm dark:shadow-[0_0_20px_rgba(16,185,129,0.15)]">
           <Activity className="w-7 h-7" />
          </div>
-         <h3 className="text-xl font-bold mb-3 text-slate-900 dark:text-white">Pemrosesan Cepat</h3>
+         <h3 className="text-xl font-bold mb-3 text-slate-800 dark:text-white/90">Pemrosesan Cepat</h3>
          <p className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed">
           Verifikasi instan dalam hitungan detik. Mengurangi waktu antrian di pintu masuk dan mencegah penumpukan pegawai.
          </p>
        </div>
 
        <div className="bg-white/80 dark:bg-white/5 shadow-sm dark:shadow-none border border-slate-200/60 dark:border-white/10 p-8 rounded-3xl hover:bg-white dark:hover:bg-white/10 transition-all group">
-         <div className="w-14 h-14 bg-slate-100 dark:bg-white/10 shadow-sm dark:shadow-none text-slate-700 dark:text-white/80 rounded-2xl flex items-center justify-center mb-8 border border-slate-200 dark:border-white/10 group-hover:scale-110 transition-transform">
+         <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-2xl flex items-center justify-center mb-8 border border-emerald-200 dark:border-emerald-500/30 group-hover:scale-110 transition-transform shadow-sm dark:shadow-[0_0_20px_rgba(16,185,129,0.15)]">
           <ShieldCheck className="w-7 h-7" />
          </div>
          <h3 className="text-xl font-bold mb-3 text-slate-800 dark:text-white/90">Liveness Anti-Spoof</h3>
@@ -259,11 +258,8 @@ export default function Landing() {
     </motion.section>
 
     {/* FOOTER */}
-    <footer className="py-8 border-t border-slate-200 dark:border-white/10">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-6 text-sm font-medium text-slate-500 dark:text-slate-400">
-       <img src="/logo.png" alt="Sentra Kreasi Logo" className="h-16 md:h-20 w-auto object-contain drop-shadow-md" />
-       <p>&copy; {new Date().getFullYear()} SentraKreasi. Hak cipta dilindungi.</p>
-      </div>
+    <footer className="py-6 mt-8 border-t border-slate-200 dark:border-white/10 flex justify-center items-center">
+      <p className="text-sm font-medium text-slate-500 dark:text-slate-400 text-center">&copy; {new Date().getFullYear()} SentraKreasi. Hak cipta dilindungi.</p>
     </footer>
 
     {/* Floating WhatsApp Action Button */}

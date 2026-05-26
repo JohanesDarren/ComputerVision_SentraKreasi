@@ -98,8 +98,8 @@ export default function AdminLayout() {
       <div className="flex-1 overflow-auto p-6 md:p-10 pb-28 md:pb-10 z-10 custom-scrollbar bg-transparent flex flex-col">
        <Outlet />
        {/* Desktop Footer */}
-       <footer className="hidden md:block mt-8 py-4 text-center text-sm text-slate-500 border-t border-slate-300 dark:border-slate-700">
-         &copy; {new Date().getFullYear()} Sentra Kreasi. Hak cipta dilindungi.
+       <footer className="hidden md:flex mt-auto py-6 items-center justify-center text-center text-sm font-medium text-slate-500 dark:text-slate-400 border-t border-slate-300 dark:border-slate-700 w-full shrink-0">
+         <p>&copy; {new Date().getFullYear()} Sentra Kreasi. Hak cipta dilindungi.</p>
        </footer>
       </div>
     </main>

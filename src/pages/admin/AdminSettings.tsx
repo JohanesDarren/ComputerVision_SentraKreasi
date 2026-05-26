@@ -1,4 +1,4 @@
-import { Sliders, Save, Shield, User, Bell } from 'lucide-react';
+import { Sliders, Save, Shield, User } from 'lucide-react';
 import { useState } from 'react';
 
 export default function AdminSettings() {
@@ -35,12 +35,6 @@ export default function AdminSettings() {
      >
       <User className="w-4 h-4" /> Pengaturan Pengguna
      </button>
-     <button 
-      onClick={() => setActiveTab('notif')} 
-      className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors ${activeTab === 'notif' ? 'bg-green-500 text-white dark:text-black' : 'hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-white/70'}`}
-     >
-      <Bell className="w-4 h-4" /> Notifikasi Sistem
-     </button>
     </div>
 
     <div className="md:col-span-3 bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-2xl p-5">
@@ -75,21 +69,6 @@ export default function AdminSettings() {
        </div>
       )}
 
-      {activeTab === 'notif' && (
-       <div className="space-y-3 animate-in fade-in slide-in-from-right-4">
-        <h3 className="text-sm font-bold border-b border-slate-300 dark:border-slate-700 pb-2 mb-4">Notifikasi Sistem</h3>
-        <div className="space-y-1 flex items-center justify-between bg-slate-200 dark:bg-slate-700 p-3 rounded-lg">
-         <div>
-          <h4 className="font-semibold text-xs">Notifikasi Telegram</h4>
-          <p className="text-[10px] text-slate-500 dark:text-white/50">Kirim laporan harian ke grup Telegram.</p>
-         </div>
-         <label className="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" className="sr-only peer" />
-          <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer dark:bg-slate-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-500"></div>
-         </label>
-        </div>
-       </div>
-      )}
 
       <div className="pt-4 mt-4 border-t border-slate-300 dark:border-slate-700 flex justify-end">
        <button type="submit" disabled={isSaving} className="px-4 py-2 bg-green-500 text-white dark:text-black font-bold rounded-lg text-xs flex items-center gap-1.5 hover:bg-green-400 disabled:opacity-50">
