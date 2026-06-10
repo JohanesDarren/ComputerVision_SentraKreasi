@@ -17,7 +17,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminPegawai from './pages/admin/AdminPegawai';
 import AdminAturan from './pages/admin/AdminAturan';
 import AdminHistory from './pages/admin/AdminHistory';
-import AdminSettings from './pages/admin/AdminSettings';
+
 
 export default function App() {
  return (
@@ -41,7 +41,7 @@ export default function App() {
       <Route path="pegawai" element={<AdminPegawai />} />
       <Route path="aturan" element={<AdminAturan />} />
       <Route path="history" element={<AdminHistory />} />
-      <Route path="settings" element={<AdminSettings />} />
+
      </Route>
 
      <Route path="*" element={<Navigate to="/" replace />} />

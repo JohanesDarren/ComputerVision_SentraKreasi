@@ -8,7 +8,7 @@ const NAV_ITEMS = [
  { label: 'Data Pegawai', icon: Users, path: '/admin/pegawai' },
  { label: 'Aturan Presensi', icon: Settings, path: '/admin/aturan' },
  { label: 'Riwayat', icon: HistoryIcon, path: '/admin/history' },
- { label: 'Settings', icon: Sliders, path: '/admin/settings' },
+
 ];
 
 export default function AdminLayout() {
