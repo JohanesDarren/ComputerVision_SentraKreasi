@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
-from core.config import supabase
-from services.face_service import process_face_image
+from app.core.config import supabase
+from app.services.face_service import process_face_image
 router = APIRouter()
 
 # Ambang batas kemiripan (Cosine Similarity Threshold).

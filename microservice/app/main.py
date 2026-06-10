@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from api.routes import router
+from app.api.routes import router
 from fastapi.middleware.cors import CORSMiddleware
 import cv2
 import os
@@ -34,7 +34,7 @@ async def startup_event():
     Ini mencegah delay besar di request pertama pengguna."""
     def warmup():
         try:
-            from services.face_service import _ensure_model_loaded
+            from app.services.face_service import _ensure_model_loaded
             _ensure_model_loaded()
         except Exception as e:
             print(f"[Warmup] Gagal pre-load model: {e}")
