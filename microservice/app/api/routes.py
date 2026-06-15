@@ -47,7 +47,13 @@ async def register_face(
         
     # Rata-ratakan semua vektor (mean pooling)
     import numpy as np
-    avg_embedding = np.mean(embeddings, axis=0).tolist()
+    avg_embedding = np.mean(embeddings, axis=0)
+    
+    # L2 Normalization sangat penting agar representasi rata-rata (centroid) dari
+    # 3 sudut wajah (depan, kiri, kanan) tetap berada di permukaan hypersphere
+    # sehingga cosine similarity bisa bekerja dengan sangat optimal dan akurat.
+    avg_embedding = avg_embedding / np.linalg.norm(avg_embedding)
+    avg_embedding = avg_embedding.tolist()
     
     # 3. Simpan/Update vektor ke database Supabase
     try:
@@ -145,3 +151,49 @@ async def verify_presence(
             "similarity_score": round(pegawai_cocok['similarity'], 4)
         }
     }
+
+import json
+import os
+from pydantic import BaseModel
+
+SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "settings.json")
+
+class AturanSettings(BaseModel):
+    jam_masuk: str
+    jam_keluar: str
+    toleransi_menit: int
+    jam_batas_pulang: str
+    hari_libur: list = []
+
+@router.get("/settings")
+def get_settings():
+    """
+    Mengambil aturan presensi global dari file settings.json
+    """
+    if os.path.exists(SETTINGS_FILE):
+        try:
+            with open(SETTINGS_FILE, "r") as f:
+                return json.load(f)
+        except Exception:
+            pass
+            
+    # Default settings jika belum ada
+    return {
+        "jam_masuk": "07:00",
+        "jam_keluar": "17:00",
+        "toleransi_menit": 15,
+        "jam_batas_pulang": "23:59",
+        "hari_libur": []
+    }
+
+@router.post("/settings")
+def update_settings(settings: AturanSettings):
+    """
+    Menyimpan aturan presensi global ke file settings.json
+    """
+    try:
+        with open(SETTINGS_FILE, "w") as f:
+            json.dump(settings.dict(), f, indent=4)
+        return {"status": "success", "message": "Aturan berhasil diperbarui."}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gagal menyimpan pengaturan: {str(e)}")

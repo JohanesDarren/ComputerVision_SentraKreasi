@@ -1,0 +1,12 @@
+{
+    "jam_masuk": "23:00",
+    "jam_keluar": "05:00",
+    "toleransi_menit": 10,
+    "jam_batas_pulang": "23:59",
+    "hari_libur": [
+        {
+            "tanggal": "2026-06-16",
+            "nama": "Tahun Baru Islam"
+        }
+    ]
+}

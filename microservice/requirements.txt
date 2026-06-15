@@ -7,3 +7,4 @@ deepface
 opencv-python-headless
 numpy
 python-dotenv
+tf-keras

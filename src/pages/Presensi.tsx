@@ -4,7 +4,7 @@ import { Camera, RefreshCw, Smile, Frown, ScanFace, ScanLine } from 'lucide-reac
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
-import { verifyFacePresence } from '../lib/api';
+import { verifyFacePresence, getSettings } from '../lib/api';
 
 export default function Presensi() {
  const webcamRef = useRef<Webcam>(null);
@@ -12,6 +12,7 @@ export default function Presensi() {
  const [scanResult, setScanResult] = useState<'success' | 'error' | null>(null);
  const [errorMessage, setErrorMessage] = useState<string>('');
  const [pegawaiData, setPegawaiData] = useState<any>(null);
+ const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
  const handleCapture = useCallback(async () => {
   setIsScanning(true);
@@ -23,6 +24,8 @@ export default function Presensi() {
    setIsScanning(false);
    return;
   }
+  
+  setCapturedImage(imageSrc);
 
   try {
    const apiResult = await verifyFacePresence(imageSrc);
@@ -35,10 +38,17 @@ export default function Presensi() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const aturanData = localStorage.getItem('app_aturan_standar');
-    let activeAturan = null;
-    if (aturanData) {
-      activeAturan = JSON.parse(aturanData);
+    let activeAturan: any = {
+      jam_masuk: '07:00',
+      jam_keluar: '17:00',
+      toleransi_menit: 15,
+      jam_batas_pulang: '23:59',
+      hari_libur: [] as any[]
+    };
+    try {
+      activeAturan = await getSettings();
+    } catch (e) {
+      console.warn("Gagal mengambil aturan dari server, menggunakan default.");
     }
     
     // Format YYYY-MM-DD local logic safely
@@ -71,14 +81,18 @@ export default function Presensi() {
       isLate = currentHour > 7 || (currentHour === 7 && currentMinute > 0);
     }
     
+    if (isLate) {
+      throw new Error(`Presensi Ditolak: Anda Terlambat. Batas waktu masuk adalah ${activeAturan.jam_masuk} dengan toleransi ${activeAturan.toleransi_menit} menit.`);
+    }
+
     const { data: records } = await supabase
      .from('presensi')
      .select('status')
      .eq('pegawai_id', pData.pegawai_id)
      .gte('waktu_hadir', today.toISOString());
      
-    let newStatus = isLate ? 'telat' : 'masuk';
-    let statusMessage = isLate ? 'Hadir (Telat)' : 'Hadir (Masuk)';
+    let newStatus = 'masuk';
+    let statusMessage = 'Hadir (Masuk)';
 
     if (records && records.length > 0) {
       const hasMasuk = records.some(r => ['masuk', 'hadir', 'telat'].includes(r.status));
@@ -119,26 +133,33 @@ export default function Presensi() {
    setScanResult('error');
   } finally {
    setIsScanning(false);
-   setTimeout(() => setScanResult(null), 5000);
+   setTimeout(() => {
+     setScanResult(null);
+     setCapturedImage(null);
+   }, 5000);
   }
  }, []);
 
   return (
-   <div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 text-slate-900 dark:text-white">
-    <div className="mb-2 bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-3xl p-6 md:p-8 max-w-[1200px] mx-auto w-full">
-     <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-white/60">Presensi Cepat</h1>
-     <p className="text-sm font-medium text-slate-700 dark:text-white/50 mt-1.5">Arahkan wajah ke kamera untuk melakukan presensi cepat secara instan.</p>
+   <div className="relative h-[100dvh] flex flex-col w-full text-slate-900 dark:text-white p-4 md:p-8 space-y-4 md:space-y-6 overflow-hidden">
+    <div className="shrink-0 mb-2 bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-3xl p-4 md:p-8 max-w-[1200px] mx-auto w-full">
+     <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-white/60">Presensi Cepat</h1>
+     <p className="text-xs md:text-sm font-medium text-slate-700 dark:text-white/50 mt-1.5">Arahkan wajah ke kamera untuk melakukan presensi cepat secara instan.</p>
     </div>
 
-    <div className="relative overflow-hidden bg-black border border-slate-300 dark:border-slate-700 rounded-[2rem] aspect-[4/3] md:aspect-video w-full max-w-[1200px] mx-auto isolate flex items-center justify-center shadow-2xl">
-     <Webcam
-      disablePictureInPicture
-      audio={false}
-      ref={webcamRef}
-      screenshotFormat="image/jpeg"
-      className="object-cover w-full h-full absolute inset-0 -z-10"
-      videoConstraints={{ facingMode: "user" }}
-     />
+    <div className="relative flex-1 min-h-[300px] overflow-hidden bg-black border border-slate-300 dark:border-slate-700 rounded-[2rem] w-full max-w-[1200px] mx-auto isolate flex items-center justify-center shadow-2xl">
+     {capturedImage ? (
+       <img src={capturedImage} alt="Captured face" className="object-cover w-full h-full absolute inset-0 -z-10" />
+     ) : (
+       <Webcam
+        disablePictureInPicture
+        audio={false}
+        ref={webcamRef}
+        screenshotFormat="image/jpeg"
+        className="object-cover w-full h-full absolute inset-0 -z-10"
+        videoConstraints={{ facingMode: "user" }}
+       />
+     )}
 
      <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none flex-col">
       <div className="relative flex items-center justify-center">
@@ -176,45 +197,40 @@ export default function Presensi() {
       </div>
      </div>
 
-     <div className="absolute bottom-6 inset-x-0 z-30 px-6 md:px-8 flex flex-col justify-end gap-4 md:flex-row md:justify-between md:items-end">
-      <div className="bg-white/85 dark:bg-black/75 p-3.5 rounded-2xl border border-slate-300 dark:border-slate-700 max-w-[200px] shadow-lg backdrop-blur-md">
-       <p className="text-slate-700 dark:text-white/50 text-xs font-semibold mb-1">Sensor Biometrik</p>
-       <h2 className="text-slate-900 dark:text-white font-extrabold text-base flex items-center gap-2">
-        <span className="w-2.5 h-2.5 bg-green-500 rounded-full shadow-[0_0_12px_rgba(34,197,94,0.9)] animate-pulse"></span>Kamera Aktif
-       </h2>
-      </div>
-      <button
-       onClick={handleCapture}
-       disabled={isScanning || scanResult === 'success'}
-       className={cn(
-        "flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-full font-extrabold text-sm transition-all shadow-lg",
-        isScanning 
-         ? "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-white/40 cursor-not-allowed border border-white/5" 
-         : "bg-green-500 text-white dark:text-black hover:bg-green-400 shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:shadow-[0_0_30px_rgba(34,197,94,0.6)]"
-       )}
-      >
-       {isScanning ? (
-        <>
-         <RefreshCw className="w-5 h-5 animate-spin" />
-         <span>Memproses Sidik Wajah...</span>
-        </>
-       ) : (
-        <>
-         <Camera className="w-5 h-5" />
-         <span>Pindai Wajah Sekarang</span>
-        </>
-       )}
-      </button>
      </div>
+    
+    <div className="shrink-0 flex justify-center w-full max-w-[1200px] mx-auto pb-2 md:pb-0">
+     <button
+      onClick={handleCapture}
+      disabled={isScanning || scanResult === 'success'}
+      className={cn(
+       "flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-full font-extrabold text-sm transition-all shadow-lg w-full md:w-auto",
+       isScanning 
+        ? "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-white/40 cursor-not-allowed border border-white/5" 
+        : "bg-green-500 text-white dark:text-black hover:bg-green-400 shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:shadow-[0_0_30px_rgba(34,197,94,0.6)]"
+      )}
+     >
+      {isScanning ? (
+       <>
+        <RefreshCw className="w-5 h-5 animate-spin" />
+        <span>Memproses Sidik Wajah...</span>
+       </>
+      ) : (
+       <>
+        <Camera className="w-5 h-5" />
+        <span>Pindai Wajah Sekarang</span>
+       </>
+      )}
+     </button>
     </div>
 
     <AnimatePresence>
      {scanResult === 'success' && pegawaiData && (
       <motion.div 
-       initial={{ opacity: 0, scale: 0.95, y: 10 }}
-       animate={{ opacity: 1, scale: 1, y: 0 }}
-       exit={{ opacity: 0, scale: 0.95, y: -10 }}
-       className="fixed top-24 left-0 right-0 z-[100] flex justify-center pointer-events-none"
+       initial={{ opacity: 0, scale: 0.95, x: 50 }}
+       animate={{ opacity: 1, scale: 1, x: 0 }}
+       exit={{ opacity: 0, scale: 0.95, x: 50 }}
+       className="fixed top-6 right-6 md:top-8 md:right-8 z-[100] flex justify-end pointer-events-none"
       >
        <div className="bg-green-400/20 dark:bg-green-500/10 border border-green-500/30 rounded-2xl p-4 flex items-center gap-4 text-left w-full max-w-sm shadow-2xl">
         <div className="w-10 h-10 bg-green-500 text-white dark:text-black rounded-xl flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(34,197,94,0.4)]">
@@ -232,10 +248,10 @@ export default function Presensi() {
 
      {scanResult === 'error' && (
       <motion.div 
-       initial={{ opacity: 0, scale: 0.95, y: 10 }}
-       animate={{ opacity: 1, scale: 1, y: 0 }}
-       exit={{ opacity: 0, scale: 0.95, y: -10 }}
-       className="fixed top-24 left-0 right-0 z-[100] flex justify-center pointer-events-none"
+       initial={{ opacity: 0, scale: 0.95, x: 50 }}
+       animate={{ opacity: 1, scale: 1, x: 0 }}
+       exit={{ opacity: 0, scale: 0.95, x: 50 }}
+       className="fixed top-6 right-6 md:top-8 md:right-8 z-[100] flex justify-end pointer-events-none"
       >
        <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 flex items-center gap-4 text-left w-full max-w-sm shadow-2xl">
         <div className="w-10 h-10 bg-red-500 text-white rounded-xl flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(239,68,68,0.4)]">
@@ -252,17 +268,17 @@ export default function Presensi() {
      )}
     </AnimatePresence>
    
-    <div className="bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-3xl p-6 flex items-center gap-6 overflow-x-auto max-w-[1200px] mx-auto w-full shadow-lg">
-    <div className="px-5 border-r border-slate-300 dark:border-slate-700 whitespace-nowrap">
-     <p className="text-xs font-semibold text-slate-700 dark:text-white/50 mb-1">Akurasi AI</p>
-     <p className="text-2xl font-black text-green-400">99.8%</p>
+    <div className="shrink-0 bg-slate-100 dark:bg-slate-800 shadow-sm border border-slate-300 dark:border-slate-700 rounded-3xl p-4 flex items-center gap-4 overflow-x-auto max-w-[1200px] mx-auto w-full shadow-lg">
+    <div className="px-3 border-r border-slate-300 dark:border-slate-700 whitespace-nowrap">
+     <p className="text-[10px] md:text-xs font-semibold text-slate-700 dark:text-white/50 mb-0.5">Akurasi AI</p>
+     <p className="text-lg md:text-2xl font-black text-green-400">99.8%</p>
     </div>
-    <div className="flex-1 bg-white/60 dark:bg-black/30 border border-slate-300 dark:border-slate-700 rounded-2xl flex items-center px-6 py-4 min-w-[220px]">
-     <p className="text-slate-700 dark:text-white/80 text-sm font-semibold truncate flex items-center gap-2.5">
-       <ScanFace className="w-5 h-5 text-green-400" />
+    <div className="flex-1 bg-white/60 dark:bg-black/30 border border-slate-300 dark:border-slate-700 rounded-2xl flex items-center px-4 py-3 min-w-[200px]">
+     <p className="text-slate-700 dark:text-white/80 text-xs md:text-sm font-semibold truncate flex items-center gap-2">
+       <ScanFace className="w-4 h-4 md:w-5 md:h-5 text-green-400" />
       {scanResult === 'success' && pegawaiData 
-       ? `"Ananda ${pegawaiData.nama.split(' ')[0]} baru saja melakukan presensi."`
-       : `"Sistem presensi biometrik cerdas siap digunakan."`}
+       ? `"Ananda ${pegawaiData.nama.split(' ')[0]} baru saja presensi."`
+       : `"Sistem presensi biometrik cerdas siap."`}
      </p>
     </div>
    </div>

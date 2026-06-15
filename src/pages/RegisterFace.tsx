@@ -23,7 +23,13 @@ import { registerFace } from '../lib/api';
  const handleCapture = () => {
   const imageSrc = webcamRef.current?.getScreenshot();
   if (imageSrc) {
-   setCapturedImages(prev => ({ ...prev, [activeAngle]: imageSrc }));
+   setCapturedImages(prev => {
+     const newImages = { ...prev, [activeAngle]: imageSrc };
+     if (newImages.depan && newImages.kiri && newImages.kanan) {
+       setStatusMsg({ type: 'success', text: '3 Sudut wajah berhasil ditangkap. Silakan klik tombol Daftarkan Wajah.' });
+     }
+     return newImages;
+   });
    if (activeAngle === 'depan') setActiveAngle('kiri');
    else if (activeAngle === 'kiri') setActiveAngle('kanan');
   }

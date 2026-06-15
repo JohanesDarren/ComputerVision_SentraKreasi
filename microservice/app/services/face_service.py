@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 # Model yang digunakan
-EMBEDDING_MODEL = "ArcFace"
+EMBEDDING_MODEL = "Facenet512"
 
 # --- Pre-load model sekali saat startup ---
 # Ini mencegah model dimuat ulang di setiap request (penyebab utama lambat)

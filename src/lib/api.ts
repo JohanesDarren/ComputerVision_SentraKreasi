@@ -12,7 +12,7 @@ export async function verifyFacePresence(base64Data: string) {
   const formData = new FormData();
   formData.append('file', blob, 'capture.jpg');
 
-  const response = await fetch('http://localhost:8000/api/v1/verify-presence', {
+  const response = await fetch('http://localhost:8001/api/v1/verify-presence', {
     method: 'POST',
     body: formData,
   });
@@ -41,7 +41,7 @@ export async function registerFace(pegawaiId: string, base64Datas: string[]) {
     formData.append('files', blob, `register_${index}.jpg`);
   });
 
-  const response = await fetch('http://localhost:8000/api/v1/register-face', {
+  const response = await fetch('http://localhost:8001/api/v1/register-face', {
     method: 'POST',
     body: formData,
   });
@@ -51,5 +51,25 @@ export async function registerFace(pegawaiId: string, base64Datas: string[]) {
     throw new Error(errorData?.detail || 'Pendaftaran wajah gagal');
   }
 
+  return response.json();
+}
+
+export async function getSettings() {
+  const response = await fetch('http://localhost:8001/api/v1/settings', {
+    method: 'GET',
+  });
+  if (!response.ok) throw new Error('Gagal mengambil pengaturan dari server');
+  return response.json();
+}
+
+export async function updateSettings(settings: any) {
+  const response = await fetch('http://localhost:8001/api/v1/settings', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(settings),
+  });
+  if (!response.ok) throw new Error('Gagal menyimpan pengaturan ke server');
   return response.json();
 }

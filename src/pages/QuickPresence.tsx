@@ -5,7 +5,7 @@ import { Camera, RefreshCw, Smile, Frown, ScanFace, ScanLine, ArrowLeft } from '
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../lib/supabase';
-import { verifyFacePresence } from '../lib/api';
+import { verifyFacePresence, getSettings } from '../lib/api';
 
 export default function QuickPresence() {
  const navigate = useNavigate();
@@ -14,6 +14,7 @@ export default function QuickPresence() {
  const [scanResult, setScanResult] = useState<'success' | 'error' | null>(null);
  const [errorMessage, setErrorMessage] = useState<string>('');
  const [pegawaiData, setPegawaiData] = useState<any>(null);
+ const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
  const handleCapture = useCallback(async () => {
   setIsScanning(true);
@@ -25,6 +26,8 @@ export default function QuickPresence() {
    setIsScanning(false);
    return;
   }
+  
+  setCapturedImage(imageSrc);
 
   try {
    const apiResult = await verifyFacePresence(imageSrc);
@@ -37,10 +40,17 @@ export default function QuickPresence() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const aturanData = localStorage.getItem('app_aturan_standar');
-    let activeAturan = null;
-    if (aturanData) {
-      activeAturan = JSON.parse(aturanData);
+    let activeAturan: any = {
+      jam_masuk: '07:00',
+      jam_keluar: '17:00',
+      toleransi_menit: 15,
+      jam_batas_pulang: '23:59',
+      hari_libur: [] as any[]
+    };
+    try {
+      activeAturan = await getSettings();
+    } catch (e) {
+      console.warn("Gagal mengambil aturan dari server, menggunakan default.");
     }
     
     // Format YYYY-MM-DD local logic safely
@@ -73,14 +83,18 @@ export default function QuickPresence() {
       isLate = currentHour > 7 || (currentHour === 7 && currentMinute > 0);
     }
     
+    if (isLate) {
+      throw new Error(`Presensi Ditolak: Anda Terlambat. Batas waktu masuk adalah ${activeAturan.jam_masuk} dengan toleransi ${activeAturan.toleransi_menit} menit.`);
+    }
+
     const { data: records } = await supabase
      .from('presensi')
      .select('status')
      .eq('pegawai_id', pData.pegawai_id)
      .gte('waktu_hadir', today.toISOString());
      
-    let newStatus = isLate ? 'telat' : 'masuk';
-    let statusMessage = isLate ? 'Hadir (Telat)' : 'Hadir (Masuk)';
+    let newStatus = 'masuk';
+    let statusMessage = 'Hadir (Masuk)';
 
     if (records && records.length > 0) {
       const hasMasuk = records.some(r => ['masuk', 'hadir', 'telat'].includes(r.status));
@@ -121,12 +135,15 @@ export default function QuickPresence() {
    setScanResult('error');
   } finally {
    setIsScanning(false);
-   setTimeout(() => setScanResult(null), 5000);
+   setTimeout(() => {
+     setScanResult(null);
+     setCapturedImage(null);
+   }, 5000);
   }
  }, []);
 
  return (
-  <div className="relative min-h-screen bg-gradient-to-br from-[#e0f2fe] via-[#f0fdf4] to-[#ffffff] dark:from-[#020617] dark:via-[#022c22] dark:to-[#000000] text-slate-800 dark:text-white font-sans overflow-x-hidden selection:bg-emerald-500 selection:text-white p-4 md:p-8">
+  <div className="relative h-[100dvh] flex flex-col bg-gradient-to-br from-[#e0f2fe] via-[#f0fdf4] to-[#ffffff] dark:from-[#020617] dark:via-[#022c22] dark:to-[#000000] text-slate-800 dark:text-white font-sans overflow-hidden selection:bg-emerald-500 selection:text-white p-4 md:p-8">
    
    {/* Background Glow */}
    <div className="fixed inset-0 z-0 pointer-events-none">
@@ -134,28 +151,32 @@ export default function QuickPresence() {
      <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-cyan-400/20 dark:bg-cyan-900/30 rounded-full blur-[150px] mix-blend-screen"></div>
    </div>
 
-   <div className="relative z-10 max-w-4xl mx-auto space-y-6">
-    <div className="flex items-center justify-between mb-8">
+   <div className="relative z-10 max-w-4xl mx-auto flex flex-col flex-1 w-full h-full space-y-4 md:space-y-6">
+    <div className="flex items-center justify-between shrink-0 mb-2 md:mb-8">
      <button onClick={() => navigate('/')} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:bg-white dark:hover:bg-white/10 text-sm font-semibold transition-all shadow-sm dark:shadow-none text-slate-800 dark:text-white">
       <ArrowLeft className="w-4 h-4" /> Kembali
      </button>
-     <img src="/logo.png" alt="SentraKreasi" className="h-16 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] dark:drop-shadow-sm brightness-110 dark:brightness-200" />
+     <img src="/logo.png" alt="SentraKreasi" className="h-10 md:h-16 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)] dark:drop-shadow-sm brightness-110 dark:brightness-200" />
     </div>
 
-    <div className="text-center mb-8">
-     <h1 className="text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-2">Presensi Cepat</h1>
-     <p className="text-slate-600 dark:text-slate-400">Arahkan wajah Anda ke kamera untuk melakukan presensi tanpa login.</p>
+    <div className="text-center shrink-0 mb-4 md:mb-8">
+     <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-1 md:mb-2">Presensi Cepat</h1>
+     <p className="text-sm md:text-base text-slate-600 dark:text-slate-400">Arahkan wajah ke kamera.</p>
     </div>
 
-    <div className="relative overflow-hidden bg-black border border-slate-300 dark:border-slate-700 rounded-[2.5rem] aspect-[4/3] md:aspect-[16/9] isolate flex items-center justify-center shadow-2xl">
-     <Webcam
-      disablePictureInPicture
-      audio={false}
-      ref={webcamRef}
-      screenshotFormat="image/jpeg"
-      className="object-cover w-full h-full absolute inset-0 -z-10"
-      videoConstraints={{ facingMode: "user" }}
-     />
+    <div className="relative overflow-hidden bg-black border border-slate-300 dark:border-slate-700 rounded-[2rem] flex-1 isolate flex items-center justify-center shadow-2xl w-full max-w-md mx-auto md:max-w-none md:aspect-video min-h-[300px]">
+     {capturedImage ? (
+       <img src={capturedImage} alt="Captured face" className="object-cover w-full h-full absolute inset-0 -z-10" />
+     ) : (
+       <Webcam
+        disablePictureInPicture
+        audio={false}
+        ref={webcamRef}
+        screenshotFormat="image/jpeg"
+        className="object-cover w-full h-full absolute inset-0 -z-10"
+        videoConstraints={{ facingMode: "user" }}
+       />
+     )}
 
      <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none flex-col">
       <div className="relative flex items-center justify-center">
@@ -191,39 +212,40 @@ export default function QuickPresence() {
        </div>
       </div>
      </div>
-
-     <div className="absolute bottom-6 inset-x-0 z-30 flex justify-center">
-      <button
-       onClick={handleCapture}
-       disabled={isScanning || scanResult === 'success'}
-       className={cn(
-        "flex items-center justify-center gap-3 px-8 py-4 rounded-full font-bold transition-all ",
-        isScanning 
-         ? "bg-slate-200 dark:bg-slate-700 shadow-sm dark:shadow-none text-slate-500 dark:text-white/40 cursor-not-allowed border border-white/5" 
-         : "bg-emerald-500 text-white dark:text-black hover:bg-emerald-600 dark:hover:bg-emerald-400 shadow-[0_4px_20px_rgba(16,185,129,0.4)] dark:shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:scale-105"
-       )}
-      >
-       {isScanning ? (
-        <>
-         <RefreshCw className="w-5 h-5 animate-spin" />
-         <span>Memproses...</span>
-        </>
-       ) : (
-        <>
-         <Camera className="w-5 h-5" />
-         <span>Pindai Wajah Sekarang</span>
-        </>
-       )}
-      </button>
-     </div>
+    </div>
+    
+    <div className="shrink-0 flex justify-center pb-2 md:pb-6">
+     <button
+      onClick={handleCapture}
+      disabled={isScanning || scanResult === 'success'}
+      className={cn(
+       "flex items-center justify-center gap-2 md:gap-3 px-6 md:px-8 py-3 md:py-4 rounded-full font-bold transition-all w-full md:w-auto max-w-sm",
+       isScanning 
+        ? "bg-slate-200 dark:bg-slate-700 shadow-sm dark:shadow-none text-slate-500 dark:text-white/40 cursor-not-allowed border border-white/5" 
+        : "bg-emerald-500 text-white dark:text-black hover:bg-emerald-600 dark:hover:bg-emerald-400 shadow-[0_4px_20px_rgba(16,185,129,0.4)] dark:shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:scale-105"
+      )}
+     >
+      {isScanning ? (
+       <>
+        <RefreshCw className="w-5 h-5 animate-spin" />
+        <span>Memproses...</span>
+       </>
+      ) : (
+       <>
+        <Camera className="w-5 h-5" />
+        <span>Pindai Wajah Sekarang</span>
+       </>
+      )}
+     </button>
+    </div>
 
      <AnimatePresence>
       {scanResult === 'success' && pegawaiData && (
        <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: -10 }}
-        className="fixed top-24 left-0 right-0 z-[100] flex justify-center pointer-events-none"
+        initial={{ opacity: 0, scale: 0.95, x: 50 }}
+        animate={{ opacity: 1, scale: 1, x: 0 }}
+        exit={{ opacity: 0, scale: 0.95, x: 50 }}
+        className="fixed top-6 right-6 md:top-8 md:right-8 z-[100] flex justify-end pointer-events-none"
        >
         <div className="bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 rounded-3xl p-5 md:p-6 flex items-center gap-5 text-left w-full max-w-md shadow-2xl">
          <div className="w-14 h-14 bg-emerald-500 text-white dark:text-black rounded-2xl flex items-center justify-center shrink-0 shadow-[0_4px_20px_rgba(16,185,129,0.4)] dark:shadow-[0_0_20px_rgba(16,185,129,0.4)]">
@@ -241,10 +263,10 @@ export default function QuickPresence() {
 
       {scanResult === 'error' && (
        <motion.div 
-        initial={{ opacity: 0, scale: 0.95, y: 10 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: -10 }}
-        className="fixed top-24 left-0 right-0 z-[100] flex justify-center pointer-events-none"
+        initial={{ opacity: 0, scale: 0.95, x: 50 }}
+        animate={{ opacity: 1, scale: 1, x: 0 }}
+        exit={{ opacity: 0, scale: 0.95, x: 50 }}
+        className="fixed top-6 right-6 md:top-8 md:right-8 z-[100] flex justify-end pointer-events-none"
        >
         <div className="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 rounded-3xl p-5 md:p-6 flex items-center gap-5 text-left w-full max-w-md shadow-2xl">
          <div className="w-14 h-14 bg-red-500 text-white dark:text-black rounded-2xl flex items-center justify-center shrink-0 shadow-[0_4px_20px_rgba(239,68,68,0.4)] dark:shadow-[0_0_20px_rgba(239,68,68,0.4)]">
@@ -262,6 +284,5 @@ export default function QuickPresence() {
      </AnimatePresence>
     </div>
    </div>
-  </div>
- );
+  );
 }

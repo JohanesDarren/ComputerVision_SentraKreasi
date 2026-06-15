@@ -2,6 +2,7 @@ import { Clock, Edit2, Loader2, Save, X, Trash2, Calendar, Plus } from 'lucide-r
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { id as localeID } from 'date-fns/locale';
+import { getSettings, updateSettings } from '../../lib/api';
 
 export default function AdminAturan() {
  const [aturan, setAturan] = useState<any>(null);
@@ -18,26 +19,18 @@ export default function AdminAturan() {
   loadAturan();
  }, []);
 
- const loadAturan = () => {
+ const loadAturan = async () => {
   setIsLoading(true);
-  const data = localStorage.getItem('app_aturan_standar');
-  if (data) {
-   let parsed = JSON.parse(data);
-   if (parsed.hari_libur && parsed.hari_libur.length > 0 && typeof parsed.hari_libur[0] === 'string') {
-     parsed.hari_libur = parsed.hari_libur.map((d: string) => ({ tanggal: d, nama: 'Libur (Migrasi)' }));
-     localStorage.setItem('app_aturan_standar', JSON.stringify(parsed));
+  try {
+   const data = await getSettings();
+   if (data.hari_libur && data.hari_libur.length > 0 && typeof data.hari_libur[0] === 'string') {
+     data.hari_libur = data.hari_libur.map((d: string) => ({ tanggal: d, nama: 'Libur (Migrasi)' }));
+     await updateSettings(data);
    }
-   setAturan(parsed);
-  } else {
-   const defaultAturan = {
-    jam_masuk: '07:00',
-    jam_keluar: '17:00',
-    toleransi_menit: 15,
-    jam_batas_pulang: '23:59',
-    hari_libur: [] as {tanggal: string, nama: string}[]
-   };
-   localStorage.setItem('app_aturan_standar', JSON.stringify(defaultAturan));
-   setAturan(defaultAturan);
+   setAturan(data);
+  } catch (error) {
+   console.error("Gagal memuat aturan:", error);
+   alert("Gagal terhubung ke server untuk memuat aturan.");
   }
   setIsLoading(false);
  };
@@ -47,11 +40,15 @@ export default function AdminAturan() {
   setShowAturanModal(true);
  };
 
- const handleSaveAturan = (e: React.FormEvent) => {
+ const handleSaveAturan = async (e: React.FormEvent) => {
   e.preventDefault();
-  localStorage.setItem('app_aturan_standar', JSON.stringify(formData));
-  setAturan(formData);
-  setShowAturanModal(false);
+  try {
+   await updateSettings(formData);
+   setAturan(formData);
+   setShowAturanModal(false);
+  } catch (error) {
+   alert("Gagal menyimpan aturan");
+  }
  };
 
  const handleAddLibur = () => {
@@ -60,7 +57,7 @@ export default function AdminAturan() {
   setShowLiburModal(true);
  };
 
- const handleSaveLibur = (e: React.FormEvent) => {
+ const handleSaveLibur = async (e: React.FormEvent) => {
   e.preventDefault();
   if (!newLiburDate || !newLiburName) return;
   
@@ -73,17 +70,25 @@ export default function AdminAturan() {
    newAturan.hari_libur.sort((a:any, b:any) => a.tanggal.localeCompare(b.tanggal));
   }
   
-  localStorage.setItem('app_aturan_standar', JSON.stringify(newAturan));
-  setAturan(newAturan);
-  setShowLiburModal(false);
+  try {
+   await updateSettings(newAturan);
+   setAturan(newAturan);
+   setShowLiburModal(false);
+  } catch (error) {
+   alert("Gagal menyimpan hari libur");
+  }
  };
 
- const removeHariLibur = (dateVal: string) => {
+ const removeHariLibur = async (dateVal: string) => {
   if (!confirm('Hapus tanggal libur ini?')) return;
   const newAturan = { ...aturan };
   newAturan.hari_libur = newAturan.hari_libur.filter((d: any) => d.tanggal !== dateVal);
-  localStorage.setItem('app_aturan_standar', JSON.stringify(newAturan));
-  setAturan(newAturan);
+  try {
+   await updateSettings(newAturan);
+   setAturan(newAturan);
+  } catch (error) {
+   alert("Gagal menghapus hari libur");
+  }
  };
 
  return (
