@@ -128,8 +128,9 @@ import { registerFace } from '../lib/api';
         audio={false}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
+        screenshotQuality={1}
         className="object-cover w-full h-full"
-        videoConstraints={{ facingMode: "user" }}
+        videoConstraints={{ facingMode: "user", width: 1280, height: 720 }}
        />
        <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
         <span className="bg-[#FAF8F5] text-[#2C2825] border-[2px] border-[#2C2825] px-3 py-1 text-[10px] font-bold uppercase tracking-widest">Kamera Registrasi</span>

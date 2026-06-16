@@ -5,9 +5,10 @@ router = APIRouter()
 
 # Ambang batas kemiripan (Cosine Similarity Threshold).
 # Rentang nilai adalah 0 sampai 1.
-# - 0.55 - 0.65 adalah rentang yang umum untuk Facenet512.
-# - Semakin kecil nilainya, semakin longgar (mudah mengenali tapi risiko salah orang naik).
-THRESHOLD_SIMILARITY = 0.55 
+# - 0.55 - 0.65 adalah rentang yang umum untuk Facenet512 di kondisi ideal.
+# - Karena kita menggunakan webcam browser, kualitas gambar bisa rendah (blur, noise).
+# - Kita turunkan ke 0.45 agar sistem tidak terlalu kaku dan mudah mengenali wajah.
+THRESHOLD_SIMILARITY = 0.45 
 
 @router.post("/register-face")
 async def register_face(

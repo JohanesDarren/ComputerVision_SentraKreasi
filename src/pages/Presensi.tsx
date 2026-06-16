@@ -156,8 +156,9 @@ export default function Presensi() {
         audio={false}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
+        screenshotQuality={1}
         className="object-cover w-full h-full absolute inset-0 -z-10"
-        videoConstraints={{ facingMode: "user" }}
+        videoConstraints={{ facingMode: "user", width: 1280, height: 720 }}
        />
      )}
 
